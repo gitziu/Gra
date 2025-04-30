@@ -8,11 +8,11 @@ public class CameraDrag : MonoBehaviour
     private Camera cam;
     public float speed = 10.5f;
     public float minZoom = 2f;
-    public float maxZoom = 10f;
+    public float maxZoom = 15f;
     private float velocity = 0f;
     public float zoomTime = 0.25f;
     private float zoom;
-    public float zoomSpeed = 4f;
+    public float zoomSpeed = 10f;
     private Vector3 dragOrigin;
 
 
