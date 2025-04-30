@@ -18,5 +18,24 @@ public class TileData{
 [Serializable]
 public class LevelData{
     public string levelID = "";
-    public List<TileData> tiles = new List<TileData>();
+    //public List<TileData> tiles = new List<TileData>();
+    public Board tiles = new Board();
+}
+
+[Serializable]
+public class Board {
+    public string this[Vector3Int position] {
+        get {
+            return tiles.TryGetValue(position, out string val) ? val : "";
+        }
+        set {
+            if(value == ""){
+                tiles.Remove(position);
+                return;
+            }
+            tiles[position] = value; 
+        }
+    }
+
+    private Dictionary<Vector3Int, string> tiles = new Dictionary<Vector3Int, string>();    
 }

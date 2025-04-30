@@ -22,12 +22,12 @@ public class LevelEditorManager : MonoBehaviour
     }
 
     public void AddTile(string Tilename, Vector3Int pos){
-        level.tiles.Add(new TileData(pos, Tilename));
+        level.tiles[pos] = Tilename;
         minimap.SetTile(pos, TileRegistry.GetTile(TileRegistry.GetMinimapAlt(Tilename)));
     }
 
     public void RemoveTIle(Vector3Int pos){
-        level.tiles.Remove(level.tiles.Find(TileData => TileData.position == pos));
+        level.tiles[pos] = "";
         minimap.SetTile(pos, null);
     }
 
