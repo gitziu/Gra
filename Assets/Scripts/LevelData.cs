@@ -4,7 +4,7 @@ using System.Numerics;
 using UnityEngine;
 
 [Serializable]
-public class TileData{
+public class TileData {
     public string TileName;
     public Vector3Int position;
 
@@ -16,7 +16,7 @@ public class TileData{
 
 
 [Serializable]
-public class LevelData{
+public class LevelData {
     public string levelID = "";
     //public List<TileData> tiles = new List<TileData>();
     public Board tiles = new Board();
