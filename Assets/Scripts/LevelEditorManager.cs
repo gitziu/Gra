@@ -5,6 +5,7 @@ using UnityEngine.Tilemaps;
 
 public class LevelEditorManager : MonoBehaviour
 {
+    public TilePanel tp;
     public LevelEditorManager Instance;
     public Tilemap minimap;
     public bool cameraDrag = true;
@@ -33,6 +34,7 @@ public class LevelEditorManager : MonoBehaviour
     public void ChangeSelectedTile(string new_tile){
         Debug.Log("selected tile : " + new_tile);
         selectedTile = new_tile;
+        tp.TogglePanel();
     }
     public void ChangeCamDrag(bool new_val){
         cameraDrag = new_val;

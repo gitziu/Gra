@@ -22,6 +22,7 @@ public class TilemapEditor : MonoBehaviour
             mouse_pos = Input.mousePosition;
             Vector3 world_pos = Camera.main.ScreenToWorldPoint(mouse_pos);
             Vector3Int tilemap_pos = tmap.WorldToCell(world_pos);
+            if(tmap.GetTile(tilemap_pos) == TileRegistry.GetTile(man.Instance.selectedTile)) return;
             Debug.Log("adding new tile to pos : " + tilemap_pos + " tile name : " + man.Instance.selectedTile);
             tmap.SetTile(tilemap_pos, TileRegistry.GetTile(man.Instance.selectedTile));
             man.Instance.AddTile(man.Instance.selectedTile, tilemap_pos);
@@ -31,6 +32,7 @@ public class TilemapEditor : MonoBehaviour
             mouse_pos = Input.mousePosition;
             Vector3 world_pos = Camera.main.ScreenToWorldPoint(mouse_pos);
             Vector3Int tilemap_pos = tmap.WorldToCell(world_pos);
+            if(tmap.GetTile(tilemap_pos) == null) return;
             Debug.Log("removing tile on pos : " + tilemap_pos);
             tmap.SetTile(tilemap_pos, null);
             man.Instance.RemoveTIle(tilemap_pos);

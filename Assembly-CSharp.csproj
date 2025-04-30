@@ -48,7 +48,9 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.46f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\TilePanel.cs" />
     <Compile Include="Assets\Scripts\CameraMovement.cs" />
+    <Compile Include="Assets\Scripts\TileSelectionParent.cs" />
     <Compile Include="Assets\Scripts\LevelEditorManager.cs" />
     <Compile Include="Assets\Scripts\MinimapCam.cs" />
     <Compile Include="Assets\Scripts\TilemapEditor.cs" />

@@ -29,21 +29,12 @@ public class CameraDrag : MonoBehaviour
         cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, zoom, ref velocity, zoomTime);
         if(!man.Instance.cameraDrag) return;
         if(Input.GetMouseButtonDown(0)) {
-            //dragOrigin = Input.mousePosition;
             dragOrigin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }
         if(Input.GetMouseButton(0)){
-            //Vector3 diff = Input.mousePosition - dragOrigin;
             Vector3 diff = Camera.main.ScreenToWorldPoint(Input.mousePosition) - dragOrigin;
-            diff = new Vector3(-diff.x, -diff.y, 0);// * speed * Time.deltaTime;
+            diff = new Vector3(-diff.x, -diff.y, 0);
             transform.Translate(diff);
-            /*
-            Vector3 diff = Input.mousePosition - dragOrigin;
-            Vector3 move = new Vector3(-diff.x, -diff.y, z_position);
-            Vector3 target = transform.position + move;
-            transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
-            */
         }
-        //dragOrigin = Input.mousePosition;
     }
 }
