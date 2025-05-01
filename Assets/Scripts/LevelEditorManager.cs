@@ -7,7 +7,7 @@ public class LevelEditorManager : MonoBehaviour
 {
     public TilePanel tp;
     public LevelEditorManager Instance;
-    public Tilemap minimap;
+    //public Tilemap minimap;
     public bool cameraDrag = true;
     public string selectedTile;
     private LevelData level = new LevelData();
@@ -23,12 +23,12 @@ public class LevelEditorManager : MonoBehaviour
 
     public void AddTile(string Tilename, Vector3Int pos){
         level.tiles[pos] = Tilename;
-        minimap.SetTile(pos, TileRegistry.GetTile(TileRegistry.GetMinimapAlt(Tilename)));
+        //minimap.SetTile(pos, TileRegistry.GetTile(TileRegistry.GetMinimapAlt(Tilename)));
     }
 
     public void RemoveTIle(Vector3Int pos){
         level.tiles[pos] = "";
-        minimap.SetTile(pos, null);
+        //minimap.SetTile(pos, null);
     }
 
     public void ChangeSelectedTile(string new_tile){
