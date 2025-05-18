@@ -22,6 +22,8 @@ public class TilemapEditor : MonoBehaviour
             mouse_pos = Input.mousePosition;
             Vector3 world_pos = Camera.main.ScreenToWorldPoint(mouse_pos);
             Vector3Int tilemap_pos = tmap.WorldToCell(world_pos);
+            Vector3Int min_tile = tmap.WorldToCell(Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0)));
+            if(tilemap_pos.x < min_tile.x) return;
             if(tmap.GetTile(tilemap_pos) == TileRegistry.GetTile(man.Instance.selectedTile)) return;
             Debug.Log("adding new tile to pos : " + tilemap_pos + " tile name : " + man.Instance.selectedTile);
             tmap.SetTile(tilemap_pos, TileRegistry.GetTile(man.Instance.selectedTile));

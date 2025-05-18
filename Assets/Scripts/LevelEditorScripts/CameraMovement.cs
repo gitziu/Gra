@@ -1,3 +1,5 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -35,6 +37,9 @@ public class CameraDrag : MonoBehaviour
             Vector3 diff = Camera.main.ScreenToWorldPoint(Input.mousePosition) - dragOrigin;
             diff = new Vector3(-diff.x, -diff.y, 0);
             transform.Translate(diff);
+            transform.position = new Vector3(Mathf.Clamp(transform.position.x, -100, 100), transform.position.y, transform.position.z);
+            Debug.Log(transform.position);
+            dragOrigin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }
     }
 }

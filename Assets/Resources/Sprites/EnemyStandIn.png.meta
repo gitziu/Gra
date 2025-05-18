@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 88f9ed399164fb54daaba911d9c110f8
+guid: 8568f66daaf8a3e489ff25c1c120a93a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1347532211411968617
-    second: Grass_0
+      213: 7857260356431223529
+    second: EnemyStandIn_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Grass_0
+      name: EnemyStandIn_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1000
-        height: 1000
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 79d946fd79a9c4de0800000000000000
-      internalID: -1347532211411968617
+      spriteID: 9ea97d42aa89a0d60800000000000000
+      internalID: 7857260356431223529
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Grass_0: -1347532211411968617
+      EnemyStandIn_0: 7857260356431223529
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

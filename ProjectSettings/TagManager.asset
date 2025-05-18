@@ -4,7 +4,10 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - minimap_cam
+  - Ground
+  - Obstacles
+  - Enemy
+  - EnemyHitBox
   layers:
   - Default
   - TransparentFX
@@ -12,8 +15,8 @@ TagManager:
   - Minimap
   - Water
   - UI
-  - 
-  - 
+  - Ground
+  - Obstacles
   - 
   - 
   - 
