@@ -18,6 +18,9 @@ public class TileData {
 [Serializable]
 public class LevelData {
     public string levelID = "";
+    public string AuthorID = "";
+    public string levelName = "";
+    public string AuthorName = "";
     //public List<TileData> tiles = new List<TileData>();
     public Board tiles = new Board();
 }
