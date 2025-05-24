@@ -122,10 +122,10 @@ TextureImporter:
       name: spritesheet-run_0
       rect:
         serializedVersion: 2
-        x: 10
+        x: 0
         y: 0
-        width: 51
-        height: 54
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -144,10 +144,10 @@ TextureImporter:
       name: spritesheet-run_1
       rect:
         serializedVersion: 2
-        x: 71
+        x: 64
         y: 0
-        width: 51
-        height: 59
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,10 +166,10 @@ TextureImporter:
       name: spritesheet-run_2
       rect:
         serializedVersion: 2
-        x: 132
-        y: 2
-        width: 57
-        height: 57
+        x: 128
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -188,7 +188,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: c5dd7686b76ad9d4c89ce8cf6fda564b
     internalID: 0
     vertices: []
     indices: 

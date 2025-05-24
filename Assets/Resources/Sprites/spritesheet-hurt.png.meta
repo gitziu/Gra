@@ -119,9 +119,9 @@ TextureImporter:
       name: spritesheet-hurt_0
       rect:
         serializedVersion: 2
-        x: 5
+        x: 0
         y: 0
-        width: 55
+        width: 64
         height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -141,9 +141,9 @@ TextureImporter:
       name: spritesheet-hurt_1
       rect:
         serializedVersion: 2
-        x: 67
+        x: 64
         y: 0
-        width: 61
+        width: 64
         height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -163,7 +163,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: f634ec2259badc84183b4fe3c92c9d75
     internalID: 0
     vertices: []
     indices: 
