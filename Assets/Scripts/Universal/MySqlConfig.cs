@@ -8,5 +8,8 @@ public class MySqlConfig
     public string Database;
     public string Uid;
     public string Password;
-    public string Port;
+    public uint Port;
+    public uint TunnelPort;
+    public string TunnelServer;
+    public string TunnelUser;
 }

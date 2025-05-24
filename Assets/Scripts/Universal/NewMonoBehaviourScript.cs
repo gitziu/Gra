@@ -4,81 +4,91 @@ using System;
 using System.Net;
 using Renci.SshNet;
 using Renci.SshNet.Common;
+using System.IO;
+
+//ascd
 
 public class MySQLTestConnection : MonoBehaviour
 {
     // ... (usunięte publiczne pola do haseł)
 
+    private SshClient ssh;
     private MySqlConnection connection;
-    private string connectionString;
 
     void Start()
     {
-        LoadConnectionData(); // Wywołaj funkcję wczytującą dane
-        Debug.Log("Trying to connect to MySQL...");
-        ConnectToDatabase();
-    }
-
-    void sshTunel()
-    {
-        PasswordConnectionInfo connectionInfo = new PasswordConnectionInfo("example.com", 2222, "username", "password");
-        connectionInfo.Timeout = TimeSpan.FromSeconds(30);
-
-        using (var client = new SshClient(connectionInfo))
+        Debug.Log("Trying to set up SSH tunnel...");
+        if (SshTunel())
         {
-            try
+            Debug.Log("Trying to connect to MySQL...");
+            if (ConnectToDatabase())
             {
-                Console.WriteLine("Trying SSH connection...");
-                client.Connect();
-                if (client.IsConnected)
-                {
-                    Console.WriteLine("SSH connection is active: {0}", client.ConnectionInfo.ToString());
-                }
-                else
-                {
-                    Console.WriteLine("SSH connection has failed: {0}", client.ConnectionInfo.ToString());
-                }
-
-                Console.WriteLine("\r\nTrying port forwarding...");
-                var portFwld = new ForwardedPortLocal(IPAddress.Loopback.ToString(), 2222, "example.com", 3306);
-                client.AddForwardedPort(portFwld);
-                portFwld.Start();
-                if (portFwld.IsStarted)
-                {
-                    Console.WriteLine("Port forwarded: {0}", portFwld.ToString());
-                    Console.WriteLine("\r\nTrying database connection...");
-
-
-                }
-                else
-                {
-                    Console.WriteLine("Port forwarding has failed.");
-                }
-
+                Debug.Log("Successfully set up DB connection");
+                SelectQuery();
             }
-            catch (SshException ex)
-            {
-                Console.WriteLine("SSH client connection error: {0}", ex.Message);
-            }
-            catch (System.Net.Sockets.SocketException ex1)
-            {
-                Console.WriteLine("Socket connection error: {0}", ex1.Message);
-            }
-
         }
     }
-    void ConnectToDatabase()
+
+    bool SshTunel()
+    {
+        var config = LoadConnectionData();
+        var key = Resources.Load<TextAsset>("ssh_key");
+        var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(key.text));
+        var connectionInfo = new PrivateKeyConnectionInfo(config.TunnelServer, config.TunnelUser, new PrivateKeyFile(stream));
+        connectionInfo.Timeout = TimeSpan.FromSeconds(30);
+
+        ssh = new SshClient(connectionInfo);
+        try
+        {
+            Console.WriteLine("Trying SSH connection...");
+            ssh.Connect();
+            if (ssh.IsConnected)
+            {
+                Console.WriteLine("SSH connection is active: {0}", ssh.ConnectionInfo.ToString());
+            }
+            else
+            {
+                Console.WriteLine("SSH connection has failed: {0}", ssh.ConnectionInfo.ToString());
+            }
+
+            Console.WriteLine("\r\nTrying port forwarding...");
+            var portFwld = new ForwardedPortLocal(IPAddress.Loopback.ToString(), config.TunnelPort, config.Server, config.Port);
+            ssh.AddForwardedPort(portFwld);
+            portFwld.Start();
+            if (portFwld.IsStarted)
+            {
+                Console.WriteLine("Port forwarded: {0}", portFwld.ToString());
+                Console.WriteLine("\r\nTrying database connection...");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Port forwarding has failed.");
+            }
+        }
+        catch (SshException ex)
+        {
+            Console.WriteLine("SSH client connection error: {0}", ex.Message);
+        }
+        catch (System.Net.Sockets.SocketException ex1)
+        {
+            Console.WriteLine("Socket connection error: {0}", ex1.Message);
+        }
+        return false;
+    }
+    bool ConnectToDatabase()
     {
         try
         {
+            var sqlConfig = LoadConnectionData();
+            var connectionString = $"Server={IPAddress.Loopback.ToString()};Port={sqlConfig.TunnelPort};Database={sqlConfig.Database};Uid={sqlConfig.Uid};Pwd={sqlConfig.Password};";
+
             connection = new MySqlConnection(connectionString);
             connection.Open();
 
             if (connection.State == System.Data.ConnectionState.Open)
             {
-                Debug.Log("Successfully connected to MySQL database!");
-                // Tutaj możesz wykonać jakieś zapytania, np. odczytać dane
-                // ExampleQuery();
+                return true;
             }
             else
             {
@@ -100,17 +110,9 @@ public class MySQLTestConnection : MonoBehaviour
             // Ogólna obsługa innych błędów
             Debug.LogError("General Connection Error: " + ex.Message);
         }
-        finally
-        {
-            // Zawsze zamykaj połączenie, gdy skończysz!
-            if (connection != null && connection.State == System.Data.ConnectionState.Open)
-            {
-                connection.Close();
-                Debug.Log("MySQL connection closed.");
-            }
-        }
+        return false;
     }
-    void LoadConnectionData()
+    MySqlConfig LoadConnectionData()
     {
         // Ścieżka do pliku konfiguracyjnego w folderze Resources
         // Plik powinien być w Assets/Resources/mysql_config.json
@@ -133,9 +135,19 @@ public class MySQLTestConnection : MonoBehaviour
             // Możesz tu wstawić jakieś domyślne wartości LUB rzucić wyjątek i zatrzymać aplikację
             // aby zapobiec próbie połączenia bez danych.
         }
-
-        connectionString = $"Server={sqlConfig.Server};Port={sqlConfig.Port};Database={sqlConfig.Database};Uid={sqlConfig.Uid};Pwd={sqlConfig.Password};";
+        return sqlConfig;
     }
 
     // ... reszta kodu ConnectToDatabase() i ExampleQuery() bez zmian
+
+    void SelectQuery()
+    {
+        string query = "select ID, name from test;";
+        MySqlCommand cmd = new MySqlCommand(query, connection);
+        MySqlDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            Debug.Log("ID : " + reader.GetInt32("ID") + " , name : " + reader.GetString("name"));
+        }
+    }
 }
