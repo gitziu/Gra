@@ -76,4 +76,4 @@ crashlytics-build.properties
 
 # MySql configuration data
 /[Aa]ssets/[Rr]esources/*.json
-/[Aa]ssets/[Rr]esources/*.rsa
+/[Aa]ssets/[Rr]esources/ssh_key.txt
