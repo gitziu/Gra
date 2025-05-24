@@ -1,0 +1,38 @@
+
+CREATE OR REPLACE TABLE platf_users (
+	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	username VARCHAR(256) NOT NULL,
+	created DATETIME NOT NULL DEFAULT (NOW()),
+	hash TEXT NOT NULL,
+	salt TEXT NOT NULL
+);
+
+CREATE OR REPLACE TABLE platf_levels (
+	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(256) NOT NULL,
+	owner_id INT NOT NULL,
+	created DATETIME NOT NULL DEFAULT (NOW()),
+	updated DATETIME NOT NULL DEFAULT (NOW()),
+	attempts INT NOT NULL DEFAULT 0,
+	successful INT NOT NULL DEFAULT 0,
+	rating DOUBLE
+);
+
+CREATE OR REPLACE TABLE platf_level_content (
+	level_id INT NOT NULL,
+	content MEDIUMTEXT NOT NULL
+);
+
+CREATE OR REPLACE TABLE platf_ratings (
+	user_id INT NOT NULL,
+	level_id INT NOT NULL,
+	first DATETIME NOT NULL DEFAULT (NOW()),
+	last DATETIME NOT NULL DEFAULT (NOW()),
+	attempts INT NOT NULL DEFAULT 0,
+	successful INT NOT NULL DEFAULT 0,
+	rating DOUBLE
+);
+
+-- Inserting a user: insert into platf_users (username, hash, salt) values (@username, SHA2(CONCAT(@password, @salt), 0), @salt);
+-- Salt can be generated on the DB too with e.g.: set @salt=TO_BASE64(RANDOM_BYTES(10));
+-- Logging in: select id, username, created from platf_users where username=@username and hash=SHA2(CONCAT(@password, salt), 0);
