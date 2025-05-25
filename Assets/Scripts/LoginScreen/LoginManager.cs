@@ -55,27 +55,22 @@ public class LoginManager : MonoBehaviour
 
     public void BeginLoginSubmission()
     {
-        if (!NewUser)
+        try
         {
-            try
+            if (!NewUser)
             {
                 db.Instance.Login(Username.text, Password.text);
+                Debug.Log("login succesful");
             }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-        }
-        else
-        {
-            try
+            else
             {
                 db.Instance.RegisterUser(Username.text, Password.text);
+                Debug.Log("registration succesful");
             }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
         }
     }
 

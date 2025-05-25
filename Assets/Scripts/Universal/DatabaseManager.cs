@@ -5,6 +5,7 @@ using System.Net;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using System.IO;
+using System.Xml.Linq;
 
 
 public class DatabaseManager : MonoBehaviour
@@ -91,7 +92,7 @@ public class DatabaseManager : MonoBehaviour
             var port = sqlConfig.Tunnel ? sqlConfig.TunnelPort : sqlConfig.Port;
             var server = sqlConfig.Tunnel ? IPAddress.Loopback.ToString() : sqlConfig.Server;
             var connectionString = $"Server={server};Port={port};Database={sqlConfig.Database};Uid={sqlConfig.Uid};Pwd={sqlConfig.Password};";
-
+            Debug.Log(connectionString);
             connection = new MySqlConnection(connectionString);
             connection.Open();
 
@@ -145,8 +146,10 @@ public class DatabaseManager : MonoBehaviour
             {
                 reader.Read();
                 CurrentUser = new User() { uid = reader.GetInt32("id"), username = reader.GetString("username") };
+                reader.Close();
                 return;
             }
+            reader.Close();
             CurrentUser = null;
         }
         catch (Exception e)

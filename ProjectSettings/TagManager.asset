@@ -8,6 +8,13 @@ TagManager:
   - Obstacles
   - Enemy
   - EnemyHitBox
+  - minimap_cam
+  - UsernameInput
+  - PasswordInput
+  - LoginButton
+  - LoginSwitchButton
+  - Placeholder
+  - LoginInput
   layers:
   - Default
   - TransparentFX
