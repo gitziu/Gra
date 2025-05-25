@@ -6,16 +6,21 @@ using Renci.SshNet;
 using Renci.SshNet.Common;
 using System.IO;
 
-//ascd
 
-public class MySQLTestConnection : MonoBehaviour
+public class DatabaseManager : MonoBehaviour
 {
-    // ... (usunięte publiczne pola do haseł)
+    public class User
+    {
+        public int uid;
+        public string username;
+    }
 
+    public User CurrentUser;
+    public DatabaseManager Instance;
     private SshClient ssh;
     private MySqlConnection connection;
 
-    void Start()
+    void Awake()
     {
         Debug.Log("Trying to set up SSH tunnel...");
         if (SshTunel())
@@ -24,12 +29,12 @@ public class MySQLTestConnection : MonoBehaviour
             if (ConnectToDatabase())
             {
                 Debug.Log("Successfully set up DB connection");
-                SelectQuery();
             }
         }
+        Instance = this;
     }
 
-    bool SshTunel()
+    private bool SshTunel()
     {
         var config = LoadConnectionData();
         if (!config.Tunnel) return true;
@@ -41,43 +46,44 @@ public class MySQLTestConnection : MonoBehaviour
         ssh = new SshClient(connectionInfo);
         try
         {
-            Console.WriteLine("Trying SSH connection...");
+            Debug.Log("Trying SSH connection...");
             ssh.Connect();
             if (ssh.IsConnected)
             {
-                Console.WriteLine("SSH connection is active: {0}", ssh.ConnectionInfo.ToString());
+                Debug.Log("SSH connection is active: " + ssh.ConnectionInfo.ToString());
             }
             else
             {
-                Console.WriteLine("SSH connection has failed: {0}", ssh.ConnectionInfo.ToString());
+                Debug.Log("SSH connection has failed: " + ssh.ConnectionInfo.ToString());
             }
 
-            Console.WriteLine("\r\nTrying port forwarding...");
+            Debug.Log("\r\nTrying port forwarding...");
             var portFwld = new ForwardedPortLocal(IPAddress.Loopback.ToString(), config.TunnelPort, config.Server, config.Port);
             ssh.AddForwardedPort(portFwld);
             portFwld.Start();
             if (portFwld.IsStarted)
             {
-                Console.WriteLine("Port forwarded: {0}", portFwld.ToString());
-                Console.WriteLine("\r\nTrying database connection...");
+                Debug.Log("Port forwarded: " + portFwld.ToString());
+                Debug.Log("\r\nTrying database connection...");
                 return true;
             }
             else
             {
-                Console.WriteLine("Port forwarding has failed.");
+                Debug.Log("Port forwarding has failed.");
             }
         }
         catch (SshException ex)
         {
-            Console.WriteLine("SSH client connection error: {0}", ex.Message);
+            Debug.Log("SSH client connection error: " + ex.Message);
         }
         catch (System.Net.Sockets.SocketException ex1)
         {
-            Console.WriteLine("Socket connection error: {0}", ex1.Message);
+            Debug.Log("Socket connection error: " + ex1.Message);
         }
         return false;
     }
-    bool ConnectToDatabase()
+
+    private bool ConnectToDatabase()
     {
         try
         {
@@ -100,34 +106,21 @@ public class MySQLTestConnection : MonoBehaviour
         }
         catch (MySqlException ex)
         {
-            // Obsługa błędów specyficznych dla MySQL
             Debug.LogError($"MySQL Connection Error ({ex.Number}): {ex.Message}");
-            // Typowe numery błędów:
-            // 0: Cannot connect to server.
-            // 1045: Invalid user name/password.
-            // 1042: Unable to connect to host.
-            // 1049: Unknown database.
         }
         catch (Exception ex)
         {
-            // Ogólna obsługa innych błędów
             Debug.LogError("General Connection Error: " + ex.Message);
         }
         return false;
     }
-    MySqlConfig LoadConnectionData()
+
+    private MySqlConfig LoadConnectionData()
     {
-        // Ścieżka do pliku konfiguracyjnego w folderze Resources
-        // Plik powinien być w Assets/Resources/mysql_config.json
         var configFile = Resources.Load<TextAsset>("mysql_config");
         MySqlConfig sqlConfig = new MySqlConfig();
         if (configFile != null)
         {
-            // Możesz użyć biblioteki SimpleJSON (do pobrania z Asset Store lub GitHub)
-            // lub napisać prosty parser JSON.
-            // Na potrzeby przykładu użyjemy SimpleJSON, bo jest proste.
-            // Jeśli jej nie masz, zainstaluj lub znajdź inny parser.
-
             sqlConfig = JsonUtility.FromJson<MySqlConfig>(configFile.text);
 
             Debug.Log("Connection data loaded from file.");
@@ -135,22 +128,55 @@ public class MySQLTestConnection : MonoBehaviour
         else
         {
             Debug.LogError("MySQL configuration file (mysql_config.json) not found in Resources folder! Please create it.");
-            // Możesz tu wstawić jakieś domyślne wartości LUB rzucić wyjątek i zatrzymać aplikację
-            // aby zapobiec próbie połączenia bez danych.
         }
         return sqlConfig;
     }
 
-    // ... reszta kodu ConnectToDatabase() i ExampleQuery() bez zmian
-
-    void SelectQuery()
+    public void Login(string username, string password)
     {
-        string query = "select ID, name from test;";
+        string query = "select id, username, created from platf_users where username=@username and hash=SHA2(CONCAT(@password, salt), 0);";
         MySqlCommand cmd = new MySqlCommand(query, connection);
-        MySqlDataReader reader = cmd.ExecuteReader();
-        while (reader.Read())
+        cmd.Parameters.AddWithValue("@password", password);
+        cmd.Parameters.AddWithValue("@username", username);
+        try
         {
-            Debug.Log("ID : " + reader.GetInt32("ID") + " , name : " + reader.GetString("name"));
+            var reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                reader.Read();
+                CurrentUser = new User() { uid = reader.GetInt32("id"), username = reader.GetString("username") };
+                return;
+            }
+            CurrentUser = null;
         }
+        catch (Exception e)
+        {
+            throw new ApplicationException("Invalid login", e);
+        }
+        throw new ApplicationException("Invalid login");
     }
+
+    public void RegisterUser(string username, string password)
+    {
+        string query = "set @salt=TO_BASE64(RANDOM_BYTES(10)); insert into platf_users (username, hash, salt) values (@username, SHA2(CONCAT(@password, @salt), 0), @salt);";
+        MySqlCommand cmd = new MySqlCommand(query, connection);
+        cmd.Parameters.AddWithValue("@username", username);
+        cmd.Parameters.AddWithValue("@password", password);
+        try
+        {
+            var rows = cmd.ExecuteNonQuery();
+            if (rows == 1)
+            {
+                CurrentUser = new User() { uid = (int)cmd.LastInsertedId, username = username };
+                return;
+            }
+            CurrentUser = null;
+        }
+        catch (Exception e)
+        {
+            throw new ApplicationException("Username already exists", e);
+        }
+        throw new ApplicationException("Username already exists");
+    }
+
 }
