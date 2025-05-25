@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class OnclickCameraDrag : MonoBehaviour
 {
-    public LevelEditorManager man;
     public Button button;
     private bool camDrag = true;
 
@@ -15,7 +14,7 @@ public class OnclickCameraDrag : MonoBehaviour
 
     void ChangeCamDrag(){
         camDrag = !camDrag;
-        man.Instance.ChangeCamDrag(camDrag);
+        LevelEditorManager.Instance.ChangeCamDrag(camDrag);
     }
 
     // Update is called once per frame

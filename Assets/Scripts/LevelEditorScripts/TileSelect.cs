@@ -15,7 +15,7 @@ public class TileSelect : MonoBehaviour
     }
 
     void updatetile(){
-        man.Instance.ChangeSelectedTile(selectabletile);
+        LevelEditorManager.Instance.ChangeSelectedTile(selectabletile);
     }
 
     // Update is called once per frame

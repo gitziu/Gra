@@ -6,6 +6,10 @@ using Renci.SshNet;
 using Renci.SshNet.Common;
 using System.IO;
 using System.Xml.Linq;
+using System.Security.Cryptography;
+using System.Buffers.Text;
+using System.Collections.Generic;
+using Org.BouncyCastle.Crypto.Parameters;
 
 
 public class DatabaseManager : MonoBehaviour
@@ -16,13 +20,31 @@ public class DatabaseManager : MonoBehaviour
         public string username;
     }
 
+    public class Level
+    {
+        public int id;
+        public string name, author;
+        public double succesRatio, rating;
+        public DateTime created, updated;
+    }
+
     public User CurrentUser;
-    public DatabaseManager Instance;
+    public static DatabaseManager Instance;
     private SshClient ssh;
     private MySqlConnection connection;
 
     void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else
+        {
+            Destroy(this.gameObject);
+            return;
+        }
         Debug.Log("Trying to set up SSH tunnel...");
         if (SshTunel())
         {
@@ -32,7 +54,6 @@ public class DatabaseManager : MonoBehaviour
                 Debug.Log("Successfully set up DB connection");
             }
         }
-        Instance = this;
     }
 
     private bool SshTunel()
@@ -141,16 +162,16 @@ public class DatabaseManager : MonoBehaviour
         cmd.Parameters.AddWithValue("@username", username);
         try
         {
-            var reader = cmd.ExecuteReader();
-            if (reader.HasRows)
+            using (var reader = cmd.ExecuteReader())
             {
-                reader.Read();
-                CurrentUser = new User() { uid = reader.GetInt32("id"), username = reader.GetString("username") };
-                reader.Close();
-                return;
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    CurrentUser = new User() { uid = reader.GetInt32("id"), username = reader.GetString("username") };
+                    return;
+                }
+                CurrentUser = null;
             }
-            reader.Close();
-            CurrentUser = null;
         }
         catch (Exception e)
         {
@@ -161,10 +182,15 @@ public class DatabaseManager : MonoBehaviour
 
     public void RegisterUser(string username, string password)
     {
-        string query = "set @salt=TO_BASE64(RANDOM_BYTES(10)); insert into platf_users (username, hash, salt) values (@username, SHA2(CONCAT(@password, @salt), 0), @salt);";
+        RandomNumberGenerator rng = RandomNumberGenerator.Create();
+        byte[] random = new byte[16];
+        rng.GetNonZeroBytes(random);
+        var salt = System.Convert.ToBase64String(random);
+        string query = "insert into platf_users (username, hash, salt) values (@username, SHA2(CONCAT(@password, @salt), 0), @salt);";
         MySqlCommand cmd = new MySqlCommand(query, connection);
         cmd.Parameters.AddWithValue("@username", username);
         cmd.Parameters.AddWithValue("@password", password);
+        cmd.Parameters.AddWithValue("@salt", salt);
         try
         {
             var rows = cmd.ExecuteNonQuery();
@@ -180,6 +206,51 @@ public class DatabaseManager : MonoBehaviour
             throw new ApplicationException("Username already exists", e);
         }
         throw new ApplicationException("Username already exists");
+    }
+
+    public IList<Level> SearchLevels(string author, string levelName, bool myLevels, bool ascending, string sortColumn, double minSuccesRatio, double maxSuccesRatio, double minRating, double maxRating)
+    {
+        switch (sortColumn)
+        {
+            case "successRatio": sortColumn = "(l.successful / l.attempts)"; break;
+            case "update": sortColumn = "l.updated"; break;
+            default: sortColumn = "l." + sortColumn; break;
+        }
+        string query = @"select l.id, l.name, u.username, l.created, l.updated, (l.successful / l.attempts) as succesRatio, l.rating
+          from platf_levels l join platf_users u on l.owner_id = u.id
+          where u.username like '%@auhtor%'
+            and l.name like '%@levelName%'
+            and l.rating >= @minRating and l.rating <= @maxRating
+            and round((l.successful / l.attempts), 2) >= @minSuccesRatio and round((l.successful / l.attempts), 2) <= @maxSuccesRatio"
+            + (myLevels ? " and u.id = @userId" : "")
+          + (sortColumn != "" ? " order by " + sortColumn + (ascending ? " asc" : " desc") : "");
+        Debug.Log("Level search query: " + query);
+        MySqlCommand cmd = new MySqlCommand(query, connection);
+        cmd.Parameters.AddWithValue("@author", author);
+        cmd.Parameters.AddWithValue("@levelName", levelName);
+        cmd.Parameters.AddWithValue("@userId", CurrentUser.uid);
+        cmd.Parameters.AddWithValue("@minSuccesRatio", minSuccesRatio);
+        cmd.Parameters.AddWithValue("@maxSuccesRatio", maxSuccesRatio);
+        cmd.Parameters.AddWithValue("@minRating", minRating);
+        cmd.Parameters.AddWithValue("@maxRating", maxRating);
+        var searchResult = new List<Level>();
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                searchResult.Add(new Level()
+                {
+                    id = reader.GetInt32("id"),
+                    author = reader.GetString("username"),
+                    name = reader.GetString("name"),
+                    created = reader.GetDateTime("created"),
+                    rating = reader.GetDouble("rating"),
+                    succesRatio = reader.GetDouble("succesRatio"),
+                    updated = reader.GetDateTime("updated")
+                });
+            }
+        }
+        return searchResult;
     }
 
 }

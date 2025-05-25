@@ -6,16 +6,20 @@ using UnityEngine.Tilemaps;
 public class LevelEditorManager : MonoBehaviour
 {
     public TilePanel tp;
-    public LevelEditorManager Instance;
+    public static LevelEditorManager Instance;
     //public Tilemap minimap;
     public bool cameraDrag = true;
     public string selectedTile;
     private LevelData level = new LevelData();
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
-        Instance = this;   
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else Destroy(this.gameObject);
         cameraDrag = true;
         selectedTile = "Grass";
         TileRegistry.LoadTilesFromResources();

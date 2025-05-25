@@ -6,7 +6,6 @@ using UnityEngine.UIElements;
 
 public class CameraDrag : MonoBehaviour
 {
-    public LevelEditorManager man;
     private Camera cam;
     public float speed = 10.5f;
     public float minZoom = 2f;
@@ -29,7 +28,7 @@ public class CameraDrag : MonoBehaviour
         zoom -= scroll * zoomSpeed;
         zoom = Mathf.Clamp(zoom, minZoom, maxZoom);
         cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, zoom, ref velocity, zoomTime);
-        if(!man.Instance.cameraDrag) return;
+        if(!LevelEditorManager.Instance.cameraDrag) return;
         if(Input.GetMouseButtonDown(0)) {
             dragOrigin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }

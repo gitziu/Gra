@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class LoginManager : MonoBehaviour
 {
-    public DatabaseManager db;
     public LoginManager Instance;
     private TMP_InputField Username, Password;
     private Transform Submit;
@@ -55,22 +54,29 @@ public class LoginManager : MonoBehaviour
 
     public void BeginLoginSubmission()
     {
+        var usernameCopy = Username.text;
         try
         {
             if (!NewUser)
             {
-                db.Instance.Login(Username.text, Password.text);
+                DatabaseManager.Instance.Login(Username.text, Password.text);
                 Debug.Log("login succesful");
+                Username.text = "";
+                Password.text = "";
+                transform.parent.parent.GetComponent<StartScreenManager>().ToggleLogin(usernameCopy);
             }
             else
             {
-                db.Instance.RegisterUser(Username.text, Password.text);
+                DatabaseManager.Instance.RegisterUser(Username.text, Password.text);
                 Debug.Log("registration succesful");
+                Username.text = "";
+                Password.text = "";
+                transform.parent.parent.GetComponent<StartScreenManager>().ToggleLogin(usernameCopy);
             }
         }
         catch (Exception e)
         {
-            Debug.Log(e);
+            transform.parent.Find("ErrorText").GetComponent<TMP_Text>().text = e.Message;
         }
     }
 
