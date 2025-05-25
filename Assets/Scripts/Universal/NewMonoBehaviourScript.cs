@@ -32,6 +32,7 @@ public class MySQLTestConnection : MonoBehaviour
     bool SshTunel()
     {
         var config = LoadConnectionData();
+        if (!config.Tunnel) return true;
         var key = Resources.Load<TextAsset>("ssh_key");
         var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(key.text));
         var connectionInfo = new PrivateKeyConnectionInfo(config.TunnelServer, config.TunnelUser, new PrivateKeyFile(stream));
@@ -81,7 +82,9 @@ public class MySQLTestConnection : MonoBehaviour
         try
         {
             var sqlConfig = LoadConnectionData();
-            var connectionString = $"Server={IPAddress.Loopback.ToString()};Port={sqlConfig.TunnelPort};Database={sqlConfig.Database};Uid={sqlConfig.Uid};Pwd={sqlConfig.Password};";
+            var port = sqlConfig.Tunnel ? sqlConfig.TunnelPort : sqlConfig.Port;
+            var server = sqlConfig.Tunnel ? IPAddress.Loopback.ToString() : sqlConfig.Server;
+            var connectionString = $"Server={server};Port={port};Database={sqlConfig.Database};Uid={sqlConfig.Uid};Pwd={sqlConfig.Password};";
 
             connection = new MySqlConnection(connectionString);
             connection.Open();

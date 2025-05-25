@@ -1,5 +1,5 @@
 
-CREATE OR REPLACE TABLE platf_users (
+CREATE TABLE platf_users (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	username VARCHAR(256) NOT NULL,
 	created DATETIME NOT NULL DEFAULT (NOW()),
@@ -7,7 +7,7 @@ CREATE OR REPLACE TABLE platf_users (
 	salt TEXT NOT NULL
 );
 
-CREATE OR REPLACE TABLE platf_levels (
+CREATE TABLE platf_levels (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	name VARCHAR(256) NOT NULL,
 	owner_id INT NOT NULL,
@@ -18,12 +18,12 @@ CREATE OR REPLACE TABLE platf_levels (
 	rating DOUBLE
 );
 
-CREATE OR REPLACE TABLE platf_level_content (
+CREATE TABLE platf_level_content (
 	level_id INT NOT NULL,
 	content MEDIUMTEXT NOT NULL
 );
 
-CREATE OR REPLACE TABLE platf_ratings (
+CREATE TABLE platf_ratings (
 	user_id INT NOT NULL,
 	level_id INT NOT NULL,
 	first DATETIME NOT NULL DEFAULT (NOW()),
