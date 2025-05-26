@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class SearchPanelManager : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class SearchPanelManager : MonoBehaviour
     public Toggle myLevels;
     public TMP_Dropdown order, sortColumn;
     public Button toggleSearch, searchButton;
+    private Vector3 velocity;
+    public float smoothTime = 0.3f;
 
     void Awake()
     {
@@ -44,27 +47,31 @@ public class SearchPanelManager : MonoBehaviour
         var col = "";
         switch (sortColumn.value)
         {
-            case 0: col = "update"; break;
-            case 1: col = "created"; break;
-            case 2: col = "succesRatio"; break;
-            case 3: col = "rating"; break;
+            case 1: col = "update"; break;
+            case 2: col = "created"; break;
+            case 3: col = "successRatio"; break;
+            case 4: col = "rating"; break;
         }
         var levels = DatabaseManager.Instance.SearchLevels(author.text,
             levelName.text,
             myLevels.isOn,
-            order.value != 2,
+            order.value != 1,
             col,
             clamp(minSuccesRatio.text, 0, 100, 0) / 100.0,
             clamp(maxSuccesRatio.text, 0, 100, 100) / 100.0,
             clamp(minRating.text, 0, 100, 0) / 100.0,
             clamp(maxRating.text, 0, 100, 100) / 100.0
         );
-        Debug.Log(levels);
+        Debug.Log(levels.Count);
+        for (int i = 0; i < levels.Count; i++)
+        {
+            Debug.Log("id : " + levels[i].id + " , name : " + levels[i].name);
+        }
     }
 
     public void TogglePanel()
     {
-
+        transform.DOMoveY(transform.GetComponent<RectTransform>().anchoredPosition.y == 0f ? transform.position.y - 400f : transform.position.y + 400f, smoothTime);
     }
 
 }

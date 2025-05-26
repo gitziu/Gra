@@ -6,8 +6,17 @@ public class StartScreenManager : MonoBehaviour
 
     void Awake()
     {
-        transform.Find("StartScreen").gameObject.SetActive(false);
-        transform.Find("Login").gameObject.SetActive(true);
+        if (DatabaseManager.Instance.CurrentUser != null)
+        {
+            transform.Find("StartScreen").gameObject.SetActive(true);
+            transform.Find("Login").gameObject.SetActive(false);
+            transform.Find("StartScreen/UserWelcomeText").GetComponent<TMP_Text>().text = "Welcome " + DatabaseManager.Instance.CurrentUser.username;
+        }
+        else
+        {
+            transform.Find("StartScreen").gameObject.SetActive(false);
+            transform.Find("Login").gameObject.SetActive(true);
+        }
     }
     public void ToggleLogin(string username)
     {

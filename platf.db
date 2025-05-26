@@ -20,7 +20,7 @@ CREATE TABLE platf_levels (
 
 CREATE TABLE platf_level_content (
 	level_id INT NOT NULL,
-	content MEDIUMTEXT NOT NULL
+	content MEDIUMBLOB NOT NULL
 );
 
 CREATE TABLE platf_ratings (

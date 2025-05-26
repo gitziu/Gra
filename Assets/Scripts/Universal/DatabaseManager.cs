@@ -10,6 +10,8 @@ using System.Security.Cryptography;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using Org.BouncyCastle.Crypto.Parameters;
+using System.Data;
+using Google.Protobuf.WellKnownTypes;
 
 
 public class DatabaseManager : MonoBehaviour
@@ -18,6 +20,12 @@ public class DatabaseManager : MonoBehaviour
     {
         public int uid;
         public string username;
+    }
+
+    public class BasicLevelData
+    {
+        public int id;
+        public string author, name;
     }
 
     public class Level
@@ -29,6 +37,7 @@ public class DatabaseManager : MonoBehaviour
     }
 
     public User CurrentUser;
+    public BasicLevelData CurrentLevel;
     public static DatabaseManager Instance;
     private SshClient ssh;
     private MySqlConnection connection;
@@ -156,7 +165,7 @@ public class DatabaseManager : MonoBehaviour
 
     public void Login(string username, string password)
     {
-        string query = "select id, username, created from platf_users where username=@username and hash=SHA2(CONCAT(@password, salt), 0);";
+        string query = "select id, username, created from platf_users where username=@username and hash=SHA2(CONCAT(@password, salt), 0)";
         MySqlCommand cmd = new MySqlCommand(query, connection);
         cmd.Parameters.AddWithValue("@password", password);
         cmd.Parameters.AddWithValue("@username", username);
@@ -186,7 +195,7 @@ public class DatabaseManager : MonoBehaviour
         byte[] random = new byte[16];
         rng.GetNonZeroBytes(random);
         var salt = System.Convert.ToBase64String(random);
-        string query = "insert into platf_users (username, hash, salt) values (@username, SHA2(CONCAT(@password, @salt), 0), @salt);";
+        string query = "insert into platf_users (username, hash, salt) values (@username, SHA2(CONCAT(@password, @salt), 0), @salt)";
         MySqlCommand cmd = new MySqlCommand(query, connection);
         cmd.Parameters.AddWithValue("@username", username);
         cmd.Parameters.AddWithValue("@password", password);
@@ -210,20 +219,22 @@ public class DatabaseManager : MonoBehaviour
 
     public IList<Level> SearchLevels(string author, string levelName, bool myLevels, bool ascending, string sortColumn, double minSuccesRatio, double maxSuccesRatio, double minRating, double maxRating)
     {
+        Debug.Log("order column : " + sortColumn);
         switch (sortColumn)
         {
             case "successRatio": sortColumn = "(l.successful / l.attempts)"; break;
             case "update": sortColumn = "l.updated"; break;
+            case "": sortColumn = ""; break;
             default: sortColumn = "l." + sortColumn; break;
         }
         string query = @"select l.id, l.name, u.username, l.created, l.updated, (l.successful / l.attempts) as succesRatio, l.rating
           from platf_levels l join platf_users u on l.owner_id = u.id
-          where u.username like '%@auhtor%'
-            and l.name like '%@levelName%'
-            and l.rating >= @minRating and l.rating <= @maxRating
-            and round((l.successful / l.attempts), 2) >= @minSuccesRatio and round((l.successful / l.attempts), 2) <= @maxSuccesRatio"
+          where u.username like Concat('%', @author, '%') 
+            and l.name like concat('%', @levelName, '%') 
+            and ((l.rating >= @minRating and l.rating <= @maxRating) or l.rating is null)
+            and ((round((l.successful / l.attempts), 2) >= @minSuccesRatio and round((l.successful / l.attempts), 2) <= @maxSuccesRatio) or l.attempts = 0)"
             + (myLevels ? " and u.id = @userId" : "")
-          + (sortColumn != "" ? " order by " + sortColumn + (ascending ? " asc" : " desc") : "");
+          + (!string.IsNullOrEmpty(sortColumn) ? " order by " + sortColumn + (ascending ? " asc" : " desc") : "");
         Debug.Log("Level search query: " + query);
         MySqlCommand cmd = new MySqlCommand(query, connection);
         cmd.Parameters.AddWithValue("@author", author);
@@ -244,13 +255,60 @@ public class DatabaseManager : MonoBehaviour
                     author = reader.GetString("username"),
                     name = reader.GetString("name"),
                     created = reader.GetDateTime("created"),
-                    rating = reader.GetDouble("rating"),
-                    succesRatio = reader.GetDouble("succesRatio"),
+                    rating = reader.IsDBNull("rating") ? 0 : reader.GetDouble("rating"),
+                    succesRatio = reader.IsDBNull("succesRatio") ? 0 : reader.GetDouble("succesRatio"),
                     updated = reader.GetDateTime("updated")
                 });
             }
         }
         return searchResult;
+    }
+
+    public void SaveLevel(string name, int id, byte[] content)
+    {
+        var query = @"insert into platf_levels (" + (id != -1 ? "id, " : "") + @"name, owner_id)
+                    values(" + (id != -1 ? "@id, " : "") + @"@name, @owner_id)
+                    on duplicate key update
+                    name = @name, updated = @updated";
+        MySqlCommand cmd = new MySqlCommand(query, connection);
+        cmd.Parameters.AddWithValue("@name", name);
+        cmd.Parameters.AddWithValue("@id", id);
+        cmd.Parameters.AddWithValue("@owner_id", CurrentUser.uid);
+        cmd.Parameters.AddWithValue("@updated", DateTime.Now);
+        try
+        {
+            var rows = cmd.ExecuteNonQuery();
+            if (rows > 0)
+            {
+                CurrentLevel = new BasicLevelData() { id = id == -1 ? (int)cmd.LastInsertedId : id, author = CurrentUser.username, name = name };
+                if (id == -1) id = (int)cmd.LastInsertedId;
+                var contentQuery = @"insert into platf_level_content (level_id, content)
+                                    values(@id, @content)
+                                    on duplicate key update
+                                    content = @content";
+                MySqlCommand contentcmd = new MySqlCommand(contentQuery, connection);
+                contentcmd.Parameters.AddWithValue("@id", id);
+                contentcmd.Parameters.AddWithValue("@content", content);
+                try
+                {
+                    var contentRows = contentcmd.ExecuteNonQuery();
+                    if (contentRows > 0)
+                    {
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new ApplicationException("Level could not be saved", e);
+                }
+                throw new ApplicationException("Level could not be saved");
+            }
+        }
+        catch (Exception e)
+        {
+            throw new ApplicationException("Level could not be saved", e);
+        }
+        throw new ApplicationException("Level could not be saved");
     }
 
 }

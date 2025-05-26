@@ -13,7 +13,8 @@ public class LoadSceneButton : MonoBehaviour
 
     void ChangeScene()
     {
-        SceneManager.LoadScene(sceneName);
+        if (sceneName == "back") SceneLoader.LoadPreviousScene();
+        else SceneLoader.LoadScene(sceneName);
     }
 
 }

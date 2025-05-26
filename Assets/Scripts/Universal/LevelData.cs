@@ -17,10 +17,6 @@ public class TileData {
 
 [Serializable]
 public class LevelData {
-    public string levelID = "";
-    public string AuthorID = "";
-    public string levelName = "";
-    public string AuthorName = "";
     //public List<TileData> tiles = new List<TileData>();
     public Board tiles = new Board();
 }
@@ -40,5 +36,5 @@ public class Board {
         }
     }
 
-    private Dictionary<Vector3Int, string> tiles = new Dictionary<Vector3Int, string>();    
+    private Dictionary<Vector3Int, string> tiles = new Dictionary<Vector3Int, string>();
 }
