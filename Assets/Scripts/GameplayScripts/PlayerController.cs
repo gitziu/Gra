@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform leftWallCheck;
     [SerializeField] private Transform rightWallCheck;
     private Rigidbody2D rb;
+    private Animator animator;
     public bool isGrounded = false;
     private KeyCode dashKey = KeyCode.K;
     private float checkRadious = 0.1f;
@@ -52,6 +53,8 @@ public class PlayerController : MonoBehaviour
         rb = transform.GetComponent<Rigidbody2D>();
         sr = transform.Find("visual").GetComponent<SpriteRenderer>();
         sr.sprite = normal;
+        animator = transform.Find("visual").GetComponent<Animator>();
+
     }
 
     public void flip()
@@ -112,6 +115,19 @@ public class PlayerController : MonoBehaviour
             facingRight = true;
             flip();
         }
+        //animations
+        float verticalVelocity = rb.linearVelocityY;
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+
+        bool isRunning = Mathf.Abs(horizontalInput) > 0 && isGrounded; // && !isDashing && !wallJumpInProgress;
+        bool isJumping = verticalVelocity > 0.1f && !isGrounded;
+        bool isFalling = verticalVelocity < -0.1f && !isGrounded;
+
+        animator.SetBool("isRunning", isRunning);
+        animator.SetBool("isJumping", isJumping);
+        animator.SetBool("isFalling", isFalling);
+
+
         //Debug.Log("change in velocity");
         rb.linearVelocityX = (Input.GetAxisRaw("Horizontal") - wallJumpBannedDirection) * moveSpeed;
         //rb.linearVelocity = new Vector2(Input.GetAxisRaw("Horizontal") * moveSpeed, rb.linearVelocityY);
