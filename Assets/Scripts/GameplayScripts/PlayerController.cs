@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     public bool isGrounded = false;
     private KeyCode dashKey = KeyCode.K;
-    private float checkRadious = 0.1f;
+    private float checkRadious = 0.2f;
     private float wallCheckRadious = 0.1f;
     public LayerMask groundLayer;
 
@@ -108,6 +108,24 @@ public class PlayerController : MonoBehaviour
             //rb.linearVelocityX = (touchingRightWall ? -moveSpeed : moveSpeed);
             Debug.Log("current velocity : " + rb.linearVelocity);
         }
+        float verticalVelocity = rb.linearVelocityY;
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        if (isGrounded)
+        {
+            isJumping = false;
+            isFalling = false;
+            isRunning = Mathf.Abs(horizontalInput) > 0; // Only consider running if grounded
+        }
+        else // Not grounded
+        {
+            isJumping = verticalVelocity > 0.1f;
+            isFalling = verticalVelocity < -0.1f;
+            isRunning = false; // Cannot be running if not grounded
+        }
+        animator.SetBool("isRunning", isRunning);
+        animator.SetBool("isJumping", isJumping);
+        animator.SetBool("isFalling", isFalling);
+
         if (wallJumpInProgress) return;
         //if (isWallJumping) return;
         if (Input.GetAxisRaw("Horizontal") == -1 && facingRight)
@@ -121,16 +139,6 @@ public class PlayerController : MonoBehaviour
             flip();
         }
         //animations
-        float verticalVelocity = rb.linearVelocityY;
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
-
-        isRunning = Mathf.Abs(horizontalInput) > 0 && isGrounded;
-        isJumping = verticalVelocity > 0.1f && !isGrounded;
-        isFalling = verticalVelocity < -0.1f && !isGrounded;
-        animator.SetBool("isRunning", isRunning);
-        animator.SetBool("isJumping", isJumping);
-        animator.SetBool("isFalling", isFalling);
-
         //Debug.Log("change in velocity");
         rb.linearVelocityX = (Input.GetAxisRaw("Horizontal") - wallJumpBannedDirection) * moveSpeed;
         //rb.linearVelocity = new Vector2(Input.GetAxisRaw("Horizontal") * moveSpeed, rb.linearVelocityY);
@@ -180,6 +188,14 @@ public class PlayerController : MonoBehaviour
         Debug.Log("current velocity : " + rb.linearVelocity);
         Debug.Log("current time : " + Time.time + " dash end time : " + (Time.time + dashDuration));
         dashEndTime = Time.time + dashDuration;
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            
+        }
     }
 
 }

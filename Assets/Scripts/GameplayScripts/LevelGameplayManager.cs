@@ -3,12 +3,21 @@ using UnityEngine.Tilemaps;
 
 public class LevelGameplayManager : MonoBehaviour
 {
+    public static LevelGameplayManager Instance;
     private Tilemap Platforms, Border, Obstacles;
     [SerializeField] GameObject CollectiblePrefab, EnemyPrefab, ExitPrefab, PlayerPrefab;
-
+    public Vector3 PlayerSpawnPoint;
 
     void Awake()
     {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
         TileRegistry.LoadTilesFromResources();
         Time.timeScale = 0f;
         Obstacles = GameObject.Find("Grid/Obstacles").transform.GetComponent<Tilemap>();
@@ -45,6 +54,7 @@ public class LevelGameplayManager : MonoBehaviour
                 Debug.Log("tile : " + s);
                 Vector3 cellBottomLeftWorldPos = Platforms.CellToWorld(new Vector3Int(x, y, 0));
                 Vector3 spawnPosition = cellBottomLeftWorldPos + centerOffset;
+                if (s == "Player") PlayerSpawnPoint = spawnPosition;
                 if (s == "Collectible") Instantiate(CollectiblePrefab, spawnPosition, Quaternion.identity);
                 else if (s == "Enemy") Instantiate(EnemyPrefab, spawnPosition, Quaternion.identity);
                 else if (s == "Exit") Instantiate(ExitPrefab, spawnPosition, Quaternion.identity);
