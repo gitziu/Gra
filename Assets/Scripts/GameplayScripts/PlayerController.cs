@@ -45,6 +45,11 @@ public class PlayerController : MonoBehaviour
     public int availableDash = 1;
     private float dashEndTime = 0f;
 
+    [Header("Animations")]
+    public bool isFalling;
+    public bool isRunning;
+    public bool isJumping;
+
     void Awake()
     {
         groundCheck = transform.Find("groundCheck");
@@ -119,14 +124,12 @@ public class PlayerController : MonoBehaviour
         float verticalVelocity = rb.linearVelocityY;
         float horizontalInput = Input.GetAxisRaw("Horizontal");
 
-        bool isRunning = Mathf.Abs(horizontalInput) > 0 && isGrounded; // && !isDashing && !wallJumpInProgress;
-        bool isJumping = verticalVelocity > 0.1f && !isGrounded;
-        bool isFalling = verticalVelocity < -0.1f && !isGrounded;
-
+        isRunning = Mathf.Abs(horizontalInput) > 0 && isGrounded;
+        isJumping = verticalVelocity > 0.1f && !isGrounded;
+        isFalling = verticalVelocity < -0.1f && !isGrounded;
         animator.SetBool("isRunning", isRunning);
         animator.SetBool("isJumping", isJumping);
         animator.SetBool("isFalling", isFalling);
-
 
         //Debug.Log("change in velocity");
         rb.linearVelocityX = (Input.GetAxisRaw("Horizontal") - wallJumpBannedDirection) * moveSpeed;

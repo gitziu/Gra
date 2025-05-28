@@ -26,7 +26,7 @@ public class LevelEditorManager : MonoBehaviour
         }
         else Destroy(this.gameObject);
         cameraDrag = true;
-        selectedTile = "Grass";
+        selectedTile = "Platform";
         TileRegistry.LoadTilesFromResources();
         levelName.text = DatabaseManager.Instance.CurrentLevel.name;
         if (string.IsNullOrEmpty(levelName.text)) saveLevelButton.interactable = false;
@@ -55,7 +55,6 @@ public class LevelEditorManager : MonoBehaviour
     {
         Debug.Log("selected tile : " + new_tile);
         selectedTile = new_tile;
-        tp.TogglePanel();
     }
     public void ChangeCamDrag(bool new_val)
     {

@@ -330,17 +330,19 @@ public class DatabaseManager : MonoBehaviour
         cmd.Parameters.AddWithValue("@level_id", level_id);
         try
         {
-            var reader = cmd.ExecuteReader();
-            if (reader.HasRows)
+            using (var reader = cmd.ExecuteReader())
             {
-                reader.Read();
-                int colOrdinal = reader.GetOrdinal("ImageData");
-                long blobLength = reader.GetBytes(colOrdinal, 0, null, 0, 0);
-                var content = new byte[blobLength];
-                reader.GetBytes(colOrdinal, 0, content, 0, (int)blobLength);
-                return content;
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    int colOrdinal = reader.GetOrdinal("content");
+                    long blobLength = reader.GetBytes(colOrdinal, 0, null, 0, 0);
+                    var content = new byte[blobLength];
+                    reader.GetBytes(colOrdinal, 0, content, 0, (int)blobLength);
+                    return content;
+                }
+                throw new ApplicationException("Couldn't retrive level data");
             }
-            throw new ApplicationException("Couldn't retrive level data");
         }
         catch (Exception e)
         {

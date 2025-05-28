@@ -15,6 +15,7 @@ TagManager:
   - LoginSwitchButton
   - Placeholder
   - LoginInput
+  - Border
   layers:
   - Default
   - TransparentFX
