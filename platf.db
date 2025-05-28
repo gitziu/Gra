@@ -19,7 +19,7 @@ CREATE TABLE platf_levels (
 );
 
 CREATE TABLE platf_level_content (
-	level_id INT NOT NULL,
+	level_id INT NOT NULL PRIMARY KEY,
 	content MEDIUMBLOB NOT NULL
 );
 

@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using System.Threading.Tasks;
 
 public class SearchPanelManager : MonoBehaviour
 {
@@ -12,9 +13,14 @@ public class SearchPanelManager : MonoBehaviour
     public Button toggleSearch, searchButton;
     private Vector3 velocity;
     public float smoothTime = 0.3f;
+    private Transform ErrorScreen;
+    [SerializeField] private LevelSelectObject ObjectPrefab;
 
     void Awake()
     {
+        ErrorScreen = GameObject.Find("Canvas/ErrorMessage").transform;
+        ErrorScreen.Find("CloseError").GetComponent<Button>().onClick.AddListener(toggleError);
+        ErrorScreen.gameObject.SetActive(false);
         author = transform.Find("AuthorInput").GetComponent<TMP_InputField>();
         levelName = transform.Find("LevelNameInput").GetComponent<TMP_InputField>();
         minSuccesRatio = transform.Find("SuccesRatioParent").Find("MinAttemptRatio").GetComponent<TMP_InputField>();
@@ -34,7 +40,8 @@ public class SearchPanelManager : MonoBehaviour
         searchButton.onClick.AddListener(Search);
     }
 
-    private int clamp(String value, int min, int max, int defaultValue) {
+    private int clamp(String value, int min, int max, int defaultValue)
+    {
         int res;
         if (!int.TryParse(value, out res)) return defaultValue;
         if (res < min) return min;
@@ -52,26 +59,45 @@ public class SearchPanelManager : MonoBehaviour
             case 3: col = "successRatio"; break;
             case 4: col = "rating"; break;
         }
-        var levels = DatabaseManager.Instance.SearchLevels(author.text,
-            levelName.text,
-            myLevels.isOn,
-            order.value != 1,
-            col,
-            clamp(minSuccesRatio.text, 0, 100, 0) / 100.0,
-            clamp(maxSuccesRatio.text, 0, 100, 100) / 100.0,
-            clamp(minRating.text, 0, 100, 0) / 100.0,
-            clamp(maxRating.text, 0, 100, 100) / 100.0
-        );
-        Debug.Log(levels.Count);
-        for (int i = 0; i < levels.Count; i++)
+        try
         {
-            Debug.Log("id : " + levels[i].id + " , name : " + levels[i].name);
+            var levels = DatabaseManager.Instance.SearchLevels(author.text,
+                levelName.text,
+                myLevels.isOn,
+                order.value != 1,
+                col,
+                clamp(minSuccesRatio.text, 0, 100, 0) / 100.0,
+                clamp(maxSuccesRatio.text, 0, 100, 100) / 100.0,
+                clamp(minRating.text, 0, 100, 0) / 100.0,
+                clamp(maxRating.text, 0, 100, 100) / 100.0
+            );
+            Debug.Log(levels.Count);
+            foreach (Transform child in GameObject.Find("ScrollAreaCanvas/ScrollArea/Viewport/Content").transform)
+            {
+                Destroy(child.gameObject);
+            }
+            for (int i = 0; i < levels.Count; i++)
+            {
+                Debug.Log("id : " + levels[i].id + " , name : " + levels[i].name);
+                LevelSelectObject newLevelSelect = Instantiate(ObjectPrefab, GameObject.Find("ScrollAreaCanvas/ScrollArea/Viewport/Content").transform);
+                newLevelSelect.Initialize(levels[i]);
+            }
+        }
+        catch (Exception e)
+        {
+            transform.parent.Find("ErrorMessage").gameObject.SetActive(true);
+            GameObject.Find("/Canvas/ErrorMessage/Error").transform.GetComponent<TMP_Text>().text = e.Message;
         }
     }
 
     public void TogglePanel()
     {
         transform.DOMoveY(transform.GetComponent<RectTransform>().anchoredPosition.y == 0f ? transform.position.y - 400f : transform.position.y + 400f, smoothTime);
+    }
+
+    public void toggleError()
+    {
+        GameObject.Find("Canvas/ErrorMessage").SetActive(false);
     }
 
 }

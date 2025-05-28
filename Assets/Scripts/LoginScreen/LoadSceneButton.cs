@@ -13,6 +13,7 @@ public class LoadSceneButton : MonoBehaviour
 
     void ChangeScene()
     {
+        if (sceneName == "Level_Editor") DatabaseManager.Instance.CurrentLevel = new DatabaseManager.BasicLevelData() {id = -1, author = DatabaseManager.Instance.CurrentUser.username, name = "", content = ""};
         if (sceneName == "back") SceneLoader.LoadPreviousScene();
         else SceneLoader.LoadScene(sceneName);
     }

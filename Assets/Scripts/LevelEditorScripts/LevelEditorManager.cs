@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
@@ -64,16 +65,30 @@ public class LevelEditorManager : MonoBehaviour
 
     public void SaveLevel()
     {
-        string levelContent = "";
+        Debug.Log("saving content");
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
         for (int y = 0; y < 1000; y++)
         {
             for (int x = 0; x < 1000; x++)
             {
-                levelContent += level.tiles[new Vector3Int(x, y, 0)] + ",";
+                sb.Append(level.tiles[new Vector3Int(x, y, 0)]);
+                sb.Append(",");
             }
         }
+        string levelContent = sb.ToString();
+        Debug.Log("LEVEL content");
         var zippedLevelContent = ZipFunctions.Zip(levelContent);
-        DatabaseManager.Instance.SaveLevel(levelName.text, DatabaseManager.Instance.CurrentLevel.id, zippedLevelContent);
+        Debug.Log("zipped");
+        try
+        {
+            Debug.Log("calling function");
+            DatabaseManager.Instance.SaveLevel(levelName.text, DatabaseManager.Instance.CurrentLevel.id, zippedLevelContent);
+            Debug.Log("success");
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e.Message);
+        }
     }
 
 }
