@@ -15,6 +15,7 @@ public class WallCheckCollider : MonoBehaviour
         if (collision.gameObject.CompareTag("Player")) return;
         Debug.Log("Entering collison with wall");
         Debug.Log(collision.gameObject.name);
-        ec.flip();
+        ec.flip(transform.parent);
+        //ec.flip(transform.parent.Find("visual"));
     }
 }

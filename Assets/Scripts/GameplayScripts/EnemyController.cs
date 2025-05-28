@@ -32,7 +32,11 @@ public class EnemyController : MonoBehaviour
             move = 4f;
             onGround = true;
         }
-        if (collision.gameObject.CompareTag("Enemy")) flip();
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            flip(transform);
+            flip(transform.Find("visual"));
+        }
     }
 
     void OnCollisionExit2D(Collision2D collision)
@@ -55,11 +59,11 @@ public class EnemyController : MonoBehaviour
         rb.linearVelocity = new Vector2(move, 0f);
     }
 
-    public void flip()
+    public void flip(Transform flipObject)
     {
         move *= -1;
-        Vector3 localScale = transform.localScale;
+        Vector3 localScale = flipObject.localScale;
         localScale.x *= -1;
-        transform.localScale = localScale;
+        flipObject.localScale = localScale;
     }
 }

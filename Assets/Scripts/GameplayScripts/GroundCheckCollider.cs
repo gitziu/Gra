@@ -15,7 +15,8 @@ public class GroundCheckCollider : MonoBehaviour
         if (collision.gameObject.CompareTag("Obstacles")) return;
         Debug.Log("Exiting collision with ground");
         Debug.Log(collision.gameObject.name);
-        ec.flip();
+        ec.flip(transform.parent);
+        //ec.flip(transform.parent.Find("visual"));
     }
 
 }
