@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using Org.BouncyCastle.Crypto.Parameters;
 using System.Data;
 using Google.Protobuf.WellKnownTypes;
+using Org.BouncyCastle.Cms;
 
 
 public class DatabaseManager : MonoBehaviour
@@ -25,12 +26,12 @@ public class DatabaseManager : MonoBehaviour
     public class BasicLevelData
     {
         public int id;
-        public string author, name;
+        public string author, name, content;
     }
 
     public class Level
     {
-        public int id;
+        public int id, Uid;
         public string name, author;
         public double succesRatio, rating;
         public DateTime created, updated;
@@ -227,7 +228,7 @@ public class DatabaseManager : MonoBehaviour
             case "": sortColumn = ""; break;
             default: sortColumn = "l." + sortColumn; break;
         }
-        string query = @"select l.id, l.name, u.username, l.created, l.updated, (l.successful / l.attempts) as succesRatio, l.rating
+        string query = @"select l.id, l.name, u.username, l.created, l.updated, (l.successful / l.attempts) as succesRatio, l.rating, u.id as Uid
           from platf_levels l join platf_users u on l.owner_id = u.id
           where u.username like Concat('%', @author, '%') 
             and l.name like concat('%', @levelName, '%') 
@@ -245,23 +246,32 @@ public class DatabaseManager : MonoBehaviour
         cmd.Parameters.AddWithValue("@minRating", minRating);
         cmd.Parameters.AddWithValue("@maxRating", maxRating);
         var searchResult = new List<Level>();
-        using (var reader = cmd.ExecuteReader())
+        try
         {
-            while (reader.Read())
+            using (var reader = cmd.ExecuteReader())
             {
-                searchResult.Add(new Level()
+                while (reader.Read())
                 {
-                    id = reader.GetInt32("id"),
-                    author = reader.GetString("username"),
-                    name = reader.GetString("name"),
-                    created = reader.GetDateTime("created"),
-                    rating = reader.IsDBNull("rating") ? 0 : reader.GetDouble("rating"),
-                    succesRatio = reader.IsDBNull("succesRatio") ? 0 : reader.GetDouble("succesRatio"),
-                    updated = reader.GetDateTime("updated")
-                });
+                    searchResult.Add(new Level()
+                    {
+                        id = reader.GetInt32("id"),
+                        author = reader.GetString("username"),
+                        name = reader.GetString("name"),
+                        created = reader.GetDateTime("created"),
+                        rating = reader.IsDBNull("rating") ? 0 : reader.GetDouble("rating"),
+                        succesRatio = reader.IsDBNull("succesRatio") ? 0 : reader.GetDouble("succesRatio"),
+                        updated = reader.GetDateTime("updated"),
+                        Uid = reader.GetInt32("Uid")
+                    });
+                }
             }
+            return searchResult;
         }
-        return searchResult;
+        catch (Exception e)
+        {
+            Debug.Log("Error in search");
+            throw new ApplicationException("Search Failed", e);
+        }
     }
 
     public void SaveLevel(string name, int id, byte[] content)
@@ -278,9 +288,10 @@ public class DatabaseManager : MonoBehaviour
         try
         {
             var rows = cmd.ExecuteNonQuery();
+            Debug.Log("level created");
             if (rows > 0)
             {
-                CurrentLevel = new BasicLevelData() { id = id == -1 ? (int)cmd.LastInsertedId : id, author = CurrentUser.username, name = name };
+                //CurrentLevel = new BasicLevelData() { id = id == -1 ? (int)cmd.LastInsertedId : id, author = CurrentUser.username, name = name };
                 if (id == -1) id = (int)cmd.LastInsertedId;
                 var contentQuery = @"insert into platf_level_content (level_id, content)
                                     values(@id, @content)
@@ -294,6 +305,7 @@ public class DatabaseManager : MonoBehaviour
                     var contentRows = contentcmd.ExecuteNonQuery();
                     if (contentRows > 0)
                     {
+                        Debug.Log("content saved");
                         return;
                     }
                 }
@@ -311,4 +323,32 @@ public class DatabaseManager : MonoBehaviour
         throw new ApplicationException("Level could not be saved");
     }
 
+    public byte[] LevelContent(int level_id)
+    {
+        var query = "select c.content from platf_level_content c where c.level_id = @level_id";
+        MySqlCommand cmd = new MySqlCommand(query, connection);
+        cmd.Parameters.AddWithValue("@level_id", level_id);
+        try
+        {
+            var reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                reader.Read();
+                int colOrdinal = reader.GetOrdinal("ImageData");
+                long blobLength = reader.GetBytes(colOrdinal, 0, null, 0, 0);
+                var content = new byte[blobLength];
+                reader.GetBytes(colOrdinal, 0, content, 0, (int)blobLength);
+                return content;
+            }
+            throw new ApplicationException("Couldn't retrive level data");
+        }
+        catch (Exception e)
+        {
+            throw new ApplicationException("Couldn't retrive level data", e);
+        }
+        throw new ApplicationException("Couldn't retrive level data");
+    }
+
+
 }
+
