@@ -330,23 +330,62 @@ public class DatabaseManager : MonoBehaviour
         cmd.Parameters.AddWithValue("@level_id", level_id);
         try
         {
-            var reader = cmd.ExecuteReader();
-            if (reader.HasRows)
+            using (var reader = cmd.ExecuteReader())
             {
-                reader.Read();
-                int colOrdinal = reader.GetOrdinal("ImageData");
-                long blobLength = reader.GetBytes(colOrdinal, 0, null, 0, 0);
-                var content = new byte[blobLength];
-                reader.GetBytes(colOrdinal, 0, content, 0, (int)blobLength);
-                return content;
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    int colOrdinal = reader.GetOrdinal("content");
+                    long blobLength = reader.GetBytes(colOrdinal, 0, null, 0, 0);
+                    var content = new byte[blobLength];
+                    reader.GetBytes(colOrdinal, 0, content, 0, (int)blobLength);
+                    return content;
+                }
+                throw new ApplicationException("Couldn't retrive level data");
             }
-            throw new ApplicationException("Couldn't retrive level data");
         }
         catch (Exception e)
         {
             throw new ApplicationException("Couldn't retrive level data", e);
         }
         throw new ApplicationException("Couldn't retrive level data");
+    }
+
+    public void DeleteLevel(int level_id)
+    {
+        var query = "delete from platf_levels where id = @level_id";
+        MySqlCommand cmd = new MySqlCommand(query, connection);
+        cmd.Parameters.AddWithValue("@level_id", level_id);
+        try
+        {
+            Debug.Log("test");
+            var rows = cmd.ExecuteNonQuery();
+            Debug.Log("Query executed, rows affected : " + Convert.ToString(rows));
+            if (rows > 0)
+            {
+                var contentQuery = "delete from platf_level_content where level_id = @level_id";
+                MySqlCommand contentCmd = new MySqlCommand(contentQuery, connection);
+                contentCmd.Parameters.AddWithValue("@level_id", level_id);
+                try
+                {
+                    var contentRows = contentCmd.ExecuteNonQuery();
+                    Debug.Log("Query executed, rows affected : " + Convert.ToString(rows));
+                    if (contentRows > 0)
+                    {
+                        return;
+                    }
+                    throw new ApplicationException("Failed to delete level");
+                }
+                catch (Exception e)
+                {
+                    throw new ApplicationException("Failed to delete level", e);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new ApplicationException("Failed to delete level", e);
+        }
     }
 
 

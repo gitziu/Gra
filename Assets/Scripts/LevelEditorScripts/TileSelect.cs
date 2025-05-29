@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class TileSelect : MonoBehaviour
 {
-    public LevelEditorManager man;
     public Button btn;
     public string selectabletile;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -15,6 +14,7 @@ public class TileSelect : MonoBehaviour
     }
 
     void updatetile(){
+        transform.parent.GetComponent<TilePanel>().TogglePanel();
         LevelEditorManager.Instance.ChangeSelectedTile(selectabletile);
     }
 

@@ -1,4 +1,5 @@
 
+DROP TABLE platf_users;
 CREATE TABLE platf_users (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	username VARCHAR(256) NOT NULL UNIQUE,
@@ -7,6 +8,7 @@ CREATE TABLE platf_users (
 	salt TEXT NOT NULL
 );
 
+DROP TABLE platf_levels;
 CREATE TABLE platf_levels (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	name VARCHAR(256) NOT NULL,
@@ -18,11 +20,13 @@ CREATE TABLE platf_levels (
 	rating DOUBLE
 );
 
+DROP TABLE platf_level_content;
 CREATE TABLE platf_level_content (
 	level_id INT NOT NULL PRIMARY KEY,
 	content MEDIUMBLOB NOT NULL
 );
 
+DROP TABLE platf_ratings;
 CREATE TABLE platf_ratings (
 	user_id INT NOT NULL,
 	level_id INT NOT NULL,
@@ -30,7 +34,8 @@ CREATE TABLE platf_ratings (
 	last DATETIME NOT NULL DEFAULT (NOW()),
 	attempts INT NOT NULL DEFAULT 0,
 	successful INT NOT NULL DEFAULT 0,
-	rating DOUBLE
+	rating DOUBLE,
+	PRIMARY KEY (user_id, level_id)
 );
 
 -- Inserting a user: insert into platf_users (username, hash, salt) values (@username, SHA2(CONCAT(@password, @salt), 0), @salt);

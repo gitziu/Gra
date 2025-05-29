@@ -85,14 +85,19 @@ public class SearchPanelManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            transform.parent.Find("ErrorMessage").gameObject.SetActive(true);
-            GameObject.Find("/Canvas/ErrorMessage/Error").transform.GetComponent<TMP_Text>().text = e.Message;
+            displayError(e);
         }
     }
 
     public void TogglePanel()
     {
         transform.DOMoveY(transform.GetComponent<RectTransform>().anchoredPosition.y == 0f ? transform.position.y - 400f : transform.position.y + 400f, smoothTime);
+    }
+
+    public void displayError(Exception e)
+    {
+        transform.parent.Find("ErrorMessage").gameObject.SetActive(true);
+        GameObject.Find("/Canvas/ErrorMessage/Error").transform.GetComponent<TMP_Text>().text = e.Message;
     }
 
     public void toggleError()

@@ -21,9 +21,25 @@ public class LevelSelectObject : MonoBehaviour
         if (DatabaseManager.Instance.CurrentUser.uid != author_id)
         {
             transform.Find("Edit").gameObject.SetActive(false);
+            transform.Find("DeleteLevel").gameObject.SetActive(false);
         }
         transform.Find("Edit").GetComponent<Button>().onClick.AddListener(() => LoadLevel(true));
         transform.Find("Play").GetComponent<Button>().onClick.AddListener(() => LoadLevel(false));
+        transform.Find("DeleteLevel").GetComponent<Button>().onClick.AddListener(deleteLevel);
+    }
+
+    void deleteLevel()
+    {
+        try
+        {
+            DatabaseManager.Instance.DeleteLevel(level_id);
+            Destroy(gameObject);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+            GameObject.Find("Canvas/SearchPanel").transform.GetComponent<SearchPanelManager>().displayError(e);
+        }
     }
 
     void LoadLevel(bool editMode)
