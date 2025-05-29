@@ -1,12 +1,22 @@
+using System;
+using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 public class LevelGameplayManager : MonoBehaviour
 {
     public static LevelGameplayManager Instance;
     private Tilemap Platforms, Border, Obstacles;
     [SerializeField] GameObject CollectiblePrefab, EnemyPrefab, ExitPrefab, PlayerPrefab;
+    private Button ExitLevel;
     public Vector3 PlayerSpawnPoint;
+    public int collectedCollectibles = 0;
+    public int attempts = 0, successful = 0;
+    private int totalCollectibles = 0;
+    private Transform LevelEndPopUp, RatePanel, ErrorPanel;
+
 
     void Awake()
     {
@@ -19,6 +29,34 @@ public class LevelGameplayManager : MonoBehaviour
             Instance = this;
         }
         TileRegistry.LoadTilesFromResources();
+        ExitLevel = GameObject.Find("Canvas/BackButton").transform.GetComponent<Button>();
+        LevelEndPopUp = GameObject.Find("Canvas/LevelEndPopUp").transform;
+        ErrorPanel = GameObject.Find("Canvas/ErrorPanel").transform;
+        RatePanel = GameObject.Find("Canvas/RatePanel").transform;
+        GameObject.Find("Canvas/LevelEndPopUp/CloseButton").transform.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            SceneLoader.LoadPreviousScene();
+        });
+        RatePanel.Find("RatingInput").GetComponent<TMP_InputField>().onEndEdit.AddListener(checkIfSubmit);
+        RatePanel.Find("ExitRating").GetComponent<Button>().onClick.AddListener(switchToRate);
+        RatePanel.Find("SubmitButton").GetComponent<Button>().onClick.AddListener(() =>
+        {
+            try
+            {
+                DatabaseManager.Instance.UpdateRatings(int.Parse(RatePanel.Find("RatingInput").GetComponent<TMP_InputField>().text)/ 100);
+            }
+            catch (Exception e)
+            {
+                DisplayError(e);
+            }
+            SceneLoader.LoadPreviousScene();
+        });
+        LevelEndPopUp.Find("RateButton").GetComponent<Button>().onClick.AddListener(switchToRate);
+        ErrorPanel.Find("CloseError").GetComponent<Button>().onClick.AddListener(toggleErrorPanel);
+        ErrorPanel.gameObject.SetActive(false);
+        RatePanel.gameObject.SetActive(false);
+        LevelEndPopUp.gameObject.SetActive(false);
+        ExitLevel.onClick.AddListener(() => triggerLevelEnd(false));
         Time.timeScale = 0f;
         Obstacles = GameObject.Find("Grid/Obstacles").transform.GetComponent<Tilemap>();
         Border = GameObject.Find("Grid/Border").transform.GetComponent<Tilemap>();
@@ -26,6 +64,18 @@ public class LevelGameplayManager : MonoBehaviour
         SetBorder();
         LoadLevel();
         Time.timeScale = 1f;
+    }
+
+    void checkIfSubmit(string s)
+    {
+        if (string.IsNullOrEmpty(s)) RatePanel.Find("SubmitButton").GetComponent<Button>().interactable = false;
+        else
+        {
+            int entered_value = int.Parse(s);
+            if (entered_value < 0) RatePanel.Find("RatingInput").GetComponent<TMP_InputField>().text = "0";
+            else if (entered_value > 100) RatePanel.Find("RatingInput").GetComponent<TMP_InputField>().text = "100";
+            RatePanel.Find("SubmitButton").GetComponent<Button>().interactable = true;
+        }
     }
 
     void SetBorder()
@@ -55,6 +105,7 @@ public class LevelGameplayManager : MonoBehaviour
                 Vector3 cellBottomLeftWorldPos = Platforms.CellToWorld(new Vector3Int(x, y, 0));
                 Vector3 spawnPosition = cellBottomLeftWorldPos + centerOffset;
                 if (s == "Player") PlayerSpawnPoint = spawnPosition;
+                if (s == "Collectible") totalCollectibles++;
                 if (s == "Collectible") Instantiate(CollectiblePrefab, spawnPosition, Quaternion.identity);
                 else if (s == "Enemy") Instantiate(EnemyPrefab, spawnPosition, Quaternion.identity);
                 else if (s == "Exit") Instantiate(ExitPrefab, spawnPosition, Quaternion.identity);
@@ -66,6 +117,43 @@ public class LevelGameplayManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void triggerLevelEnd(bool levelFinished)
+    {
+        LevelEndPopUp.gameObject.SetActive(true);
+        LevelEndPopUp.Find("CompletionText").GetComponent<TMP_Text>().text = levelFinished ? "Level Complete!" : "Level Failed";
+        if (!levelFinished) LevelEndPopUp.Find("RateButton").GetComponent<Button>().interactable = false;
+        else LevelEndPopUp.Find("RateButton").GetComponent<Button>().interactable = true;
+        LevelEndPopUp.Find("Deaths").GetComponent<TMP_Text>().text = "Deaths : " + attempts;
+        LevelEndPopUp.Find("Collectibles").GetComponent<TMP_Text>().text = "Collectibles : " + collectedCollectibles + " / " + totalCollectibles;
+        try
+        {
+            DatabaseManager.Instance.UpdateAttempts(attempts, successful);
+        }
+        catch (Exception e)
+        {
+            DisplayError(e);
+        }
+    }
+
+    public void switchToRate()
+    {
+        LevelEndPopUp.gameObject.SetActive(!LevelEndPopUp.gameObject.activeSelf);
+        RatePanel.gameObject.SetActive(!RatePanel.gameObject.activeSelf);
+        RatePanel.Find("RatingInput").GetComponent<TMP_InputField>().text = "";
+        RatePanel.Find("SubmitButton").GetComponent<Button>().interactable = false;
+    }
+
+    void toggleErrorPanel()
+    {
+        ErrorPanel.gameObject.SetActive(!ErrorPanel.gameObject.activeSelf);
+    }
+
+    public void DisplayError(Exception e)
+    {
+        toggleErrorPanel();
+        ErrorPanel.Find("ErrorMessage").GetComponent<TMP_Text>().text = e.Message;
     }
 
 }

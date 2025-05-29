@@ -27,7 +27,6 @@ public class PlayerController : MonoBehaviour
     private bool facingRight = true;
     public float fallGravityMultiplier = 2.5f;
     public float lowJumpGravityMultiplier = 3.5f;
-    private float wallJumpEnd = 0f;
 
     [Header("Wall jump")]
 
@@ -49,6 +48,10 @@ public class PlayerController : MonoBehaviour
     public bool isFalling;
     public bool isRunning;
     public bool isJumping;
+    public bool isHurt = false;
+    public float DeathDuration = 0.35f;
+    public float DeathEndTime;
+    public bool CurrentlyDying = false;
 
     void Awake()
     {
@@ -71,6 +74,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (Time.time >= DeathEndTime && CurrentlyDying) respawn();
+        if (CurrentlyDying) return;
         touchingWall = Physics2D.OverlapCircle(leftWallCheck.position, wallCheckRadious, groundLayer) || Physics2D.OverlapCircle(rightWallCheck.position, wallCheckRadious, groundLayer);
         touchingRightWall = Physics2D.OverlapCircle(rightWallCheck.position, wallCheckRadious, groundLayer);
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadious, groundLayer);
@@ -190,11 +195,55 @@ public class PlayerController : MonoBehaviour
         dashEndTime = Time.time + dashDuration;
     }
 
-    void OnCollisionEnter(Collision collision)
+
+    public void Death()
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+        DeathEndTime = Time.time + DeathDuration;
+        CurrentlyDying = true;
+        LevelGameplayManager.Instance.attempts++;
+        isHurt = true;
+        isFalling = false;
+        isRunning = false;
+        isJumping = false;
+        animator.SetBool("isFalling", isFalling);
+        animator.SetBool("isRunning", isRunning);
+        animator.SetBool("isJumping", isJumping);
+        animator.SetBool("isHurt", isHurt);
+        rb.linearVelocity = Vector2.zero;
+        rb.gravityScale = 0f;
+        rb.simulated = false;
+        transform.GetComponent<BoxCollider2D>().enabled = false;
+    }
+
+    public void respawn()
+    {
+        transform.position = LevelGameplayManager.Instance.PlayerSpawnPoint;
+        CurrentlyDying = false;
+        rb.simulated = true;
+        transform.GetComponent<BoxCollider2D>().enabled = true;
+        isHurt = false;
+        rb.gravityScale = 1f;
+        animator.SetBool("isHurt", isHurt);
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if ((collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Border")) && CurrentlyDying == false)
         {
-            
+            Death();
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Exit"))
+        {
+            LevelGameplayManager.Instance.successful++;
+            LevelGameplayManager.Instance.triggerLevelEnd(true);
+        }
+        if (collision.gameObject.CompareTag("Collectible"))
+        {
+            LevelGameplayManager.Instance.collectedCollectibles++;
         }
     }
 

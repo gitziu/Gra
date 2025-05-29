@@ -16,6 +16,7 @@ TagManager:
   - Placeholder
   - LoginInput
   - Border
+  - Exit
   layers:
   - Default
   - TransparentFX

@@ -13,6 +13,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 using System.Data;
 using Google.Protobuf.WellKnownTypes;
 using Org.BouncyCastle.Cms;
+using System.Threading.Tasks;
 
 
 public class DatabaseManager : MonoBehaviour
@@ -385,6 +386,95 @@ public class DatabaseManager : MonoBehaviour
         catch (Exception e)
         {
             throw new ApplicationException("Failed to delete level", e);
+        }
+    }
+
+    public void UpdateAttempts(int attempts, int successful)
+    {
+        var query = @"Update platf_levels
+                    set attempts = attempts + @attempts,
+                    successful = successful + @successful
+                    where id = @level_id";
+        var cmd = new MySqlCommand(query, connection);
+        cmd.Parameters.AddWithValue("@attempts", attempts);
+        cmd.Parameters.AddWithValue("@successful", successful);
+        cmd.Parameters.AddWithValue("@level_id", CurrentLevel.id);
+        try
+        {
+            var rows = cmd.ExecuteNonQuery();
+            if (rows > 0)
+            {
+                var ratingsquery = @"insert into platf_ratings (level_id, user_id, attempts, successful)
+                                    values (@level_id, @user_id, @attempts, @successful)
+                                    on duplicate key update
+                                    attempts = attempts + @attempts,
+                                    successful = successful + @successful";
+                var ratingsCmd = new MySqlCommand(ratingsquery, connection);
+                ratingsCmd.Parameters.AddWithValue("@level_id", CurrentLevel.id);
+                ratingsCmd.Parameters.AddWithValue("@user_id", CurrentUser.uid);
+                ratingsCmd.Parameters.AddWithValue("@attempts", attempts);
+                ratingsCmd.Parameters.AddWithValue("@successful", successful);
+                try
+                {
+                    var ratingRows = ratingsCmd.ExecuteNonQuery();
+                    if (ratingRows > 0)
+                    {
+                        return;
+                    }
+                    throw new ApplicationException("Failed to update level attempts");
+                }
+                catch (Exception e)
+                {
+                    throw new ApplicationException("Failed to update level attempts", e);
+                }
+            }
+            throw new ApplicationException("Failed to update level attempts");
+        }
+        catch (Exception e)
+        {
+            throw new ApplicationException("Failed to update level attempts", e);
+        }
+    }
+
+    public void UpdateRatings(double rating)
+    {
+        var query = @"insert into platf_ratings (level_id, user_id, rating)
+                    values (@level_id, @user_id, @rating)
+                    on duplicate key update
+                    rating = @rating";
+        var cmd = new MySqlCommand(query, connection);
+        cmd.Parameters.AddWithValue("@level_id", CurrentLevel.id);
+        cmd.Parameters.AddWithValue("@user_id", CurrentUser.uid);
+        cmd.Parameters.AddWithValue("@rating", rating);
+        try
+        {
+            var rows = cmd.ExecuteNonQuery();
+            if (rows > 0)
+            {
+                var generalQuery = @"update platf_levels
+                                    set rating = (select avg(rating) from platf_ratings where level_id = @level_id)
+                                    where id = @level_id";
+                var generalCmd = new MySqlCommand(generalQuery, connection);
+                generalCmd.Parameters.AddWithValue("@level_id", CurrentLevel.id);
+                try
+                {
+                    var genRows = generalCmd.ExecuteNonQuery();
+                    if (genRows > 0)
+                    {
+                        return;
+                    }
+                    throw new ApplicationException("Failed to update ratings");
+                }
+                catch (Exception e)
+                {
+                    throw new ApplicationException("Failed to update ratings", e);
+                }
+            }
+            throw new ApplicationException("Failed to update ratings");
+        }
+        catch (Exception e)
+        {
+            throw new ApplicationException("Failed to update ratings", e);
         }
     }
 
