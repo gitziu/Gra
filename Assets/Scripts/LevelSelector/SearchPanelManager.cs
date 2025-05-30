@@ -32,12 +32,14 @@ public class SearchPanelManager : MonoBehaviour
         searchButton = transform.Find("SearchButton").GetComponent<Button>();
         minRating = transform.Find("RatingParent/MinRating").GetComponent<TMP_InputField>();
         maxRating = transform.Find("RatingParent/MaxRating").GetComponent<TMP_InputField>();
+        transform.Find("ReturnButton").GetComponent<Button>().onClick.AddListener(SceneLoader.LoadPreviousScene);
         Debug.Log("author : " + author);
         Debug.Log("sortColumn : " + sortColumn);
         Debug.Log(transform.Find("SortParent/OrderBy").name);
         myLevels.isOn = false;
         toggleSearch.onClick.AddListener(TogglePanel);
         searchButton.onClick.AddListener(Search);
+        Search();
     }
 
     private int clamp(String value, int min, int max, int defaultValue)

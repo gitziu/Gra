@@ -74,6 +74,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (LevelGameplayManager.Instance.levelEnd) return;
         if (Time.time >= DeathEndTime && CurrentlyDying) respawn();
         if (CurrentlyDying) return;
         touchingWall = Physics2D.OverlapCircle(leftWallCheck.position, wallCheckRadious, groundLayer) || Physics2D.OverlapCircle(rightWallCheck.position, wallCheckRadious, groundLayer);
@@ -228,7 +229,7 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if ((collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Border")) && CurrentlyDying == false)
+        if ((collision.collider.CompareTag("Enemy") || collision.collider.CompareTag("Border")) && CurrentlyDying == false)
         {
             Death();
         }

@@ -17,6 +17,7 @@ TagManager:
   - LoginInput
   - Border
   - Exit
+  - Collectible
   layers:
   - Default
   - TransparentFX

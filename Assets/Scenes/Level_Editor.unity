@@ -952,7 +952,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 10.5
   minZoom: 2
-  maxZoom: 10
+  maxZoom: 15
   zoomTime: 0.25
   zoomSpeed: 10
   cameraMargin: 50
@@ -2238,6 +2238,7 @@ MonoBehaviour:
   levelName: {fileID: 1774770863}
   saveLevelButton: {fileID: 1346906441}
   selectedTile: 
+  tilemap: {fileID: 100438298}
 --- !u!4 &1074298995
 Transform:
   m_ObjectHideFlags: 0
@@ -3087,7 +3088,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Tile Selector
+  m_text: Object Selector
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

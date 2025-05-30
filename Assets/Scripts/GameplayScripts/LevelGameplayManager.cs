@@ -13,9 +13,10 @@ public class LevelGameplayManager : MonoBehaviour
     private Button ExitLevel;
     public Vector3 PlayerSpawnPoint;
     public int collectedCollectibles = 0;
-    public int attempts = 0, successful = 0;
+    public int attempts = 1, successful = 0;
     private int totalCollectibles = 0;
     private Transform LevelEndPopUp, RatePanel, ErrorPanel;
+    public bool levelEnd = false;
 
 
     void Awake()
@@ -35,6 +36,8 @@ public class LevelGameplayManager : MonoBehaviour
         RatePanel = GameObject.Find("Canvas/RatePanel").transform;
         GameObject.Find("Canvas/LevelEndPopUp/CloseButton").transform.GetComponent<Button>().onClick.AddListener(() =>
         {
+            Time.timeScale = 1f;
+            levelEnd = false;
             SceneLoader.LoadPreviousScene();
         });
         RatePanel.Find("RatingInput").GetComponent<TMP_InputField>().onEndEdit.AddListener(checkIfSubmit);
@@ -43,12 +46,16 @@ public class LevelGameplayManager : MonoBehaviour
         {
             try
             {
-                DatabaseManager.Instance.UpdateRatings(int.Parse(RatePanel.Find("RatingInput").GetComponent<TMP_InputField>().text)/ 100);
+                Debug.Log(int.Parse(RatePanel.Find("RatingInput").GetComponent<TMP_InputField>().text) / 100.0);
+                DatabaseManager.Instance.UpdateRatings(int.Parse(RatePanel.Find("RatingInput").GetComponent<TMP_InputField>().text) / 100.0);
             }
             catch (Exception e)
             {
                 DisplayError(e);
+                return;
             }
+            Time.timeScale = 1f;
+            levelEnd = false;
             SceneLoader.LoadPreviousScene();
         });
         LevelEndPopUp.Find("RateButton").GetComponent<Button>().onClick.AddListener(switchToRate);
@@ -121,11 +128,13 @@ public class LevelGameplayManager : MonoBehaviour
 
     public void triggerLevelEnd(bool levelFinished)
     {
+        Time.timeScale = 0f;
+        levelEnd = true;
         LevelEndPopUp.gameObject.SetActive(true);
         LevelEndPopUp.Find("CompletionText").GetComponent<TMP_Text>().text = levelFinished ? "Level Complete!" : "Level Failed";
         if (!levelFinished) LevelEndPopUp.Find("RateButton").GetComponent<Button>().interactable = false;
         else LevelEndPopUp.Find("RateButton").GetComponent<Button>().interactable = true;
-        LevelEndPopUp.Find("Deaths").GetComponent<TMP_Text>().text = "Deaths : " + attempts;
+        LevelEndPopUp.Find("Deaths").GetComponent<TMP_Text>().text = "Deaths : " + (attempts - 1);
         LevelEndPopUp.Find("Collectibles").GetComponent<TMP_Text>().text = "Collectibles : " + collectedCollectibles + " / " + totalCollectibles;
         try
         {
