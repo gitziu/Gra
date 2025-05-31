@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using System.Threading.Tasks;
+using UnityEngine.Events;
 
 public class SearchPanelManager : MonoBehaviour
 {
@@ -39,7 +40,30 @@ public class SearchPanelManager : MonoBehaviour
         myLevels.isOn = false;
         toggleSearch.onClick.AddListener(TogglePanel);
         searchButton.onClick.AddListener(Search);
+        minSuccesRatio.onEndEdit.AddListener(ClampMinMax(minSuccesRatio, maxSuccesRatio));
+        maxSuccesRatio.onEndEdit.AddListener(ClampMinMax(minSuccesRatio, maxSuccesRatio));
+        maxRating.onEndEdit.AddListener(ClampMinMax(minRating, maxRating));
+        minRating.onEndEdit.AddListener(ClampMinMax(minRating, maxRating));
         Search();
+    }
+
+    private UnityAction<string> ClampMinMax(TMP_InputField minField, TMP_InputField maxField)
+    {
+        return (string s) =>
+        {
+            int min, max;
+            var minparse = int.TryParse(minField.text, out min);
+            var maxparse = int.TryParse(maxField.text, out max);
+            if (!minparse) min = 0;
+            if (!maxparse) max = 100;
+            if (min < 0) min = 0;
+            if (min > 100) min = 100;
+            if (max < 0) max = 0;
+            if (max > 100) max = 100;
+            if (min > max) min = max;
+            minField.text = min.ToString();
+            maxField.text = max.ToString();
+        };
     }
 
     private int clamp(String value, int min, int max, int defaultValue)
