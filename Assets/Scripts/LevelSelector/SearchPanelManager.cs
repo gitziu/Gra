@@ -3,7 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
-using System.Threading.Tasks;
 using UnityEngine.Events;
 
 public class SearchPanelManager : MonoBehaviour

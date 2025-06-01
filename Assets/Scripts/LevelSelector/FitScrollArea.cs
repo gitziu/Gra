@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Animations;
 
 public class FitScrollArea : MonoBehaviour
 {

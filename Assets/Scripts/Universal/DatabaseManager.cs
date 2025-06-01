@@ -5,15 +5,9 @@ using System.Net;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using System.IO;
-using System.Xml.Linq;
 using System.Security.Cryptography;
-using System.Buffers.Text;
 using System.Collections.Generic;
-using Org.BouncyCastle.Crypto.Parameters;
 using System.Data;
-using Google.Protobuf.WellKnownTypes;
-using Org.BouncyCastle.Cms;
-using System.Threading.Tasks;
 
 
 public class DatabaseManager : MonoBehaviour

@@ -1,7 +1,4 @@
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
-using UnityEngine.InputSystem.iOS;
-using System;
 
 public class EnemyController : MonoBehaviour
 {

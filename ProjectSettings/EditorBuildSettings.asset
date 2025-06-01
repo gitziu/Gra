@@ -6,17 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Login_Screen.unity
+    guid: 9e3b431291f39d64bae5358aaa470a1a
+  - enabled: 1
+    path: Assets/Scenes/Level_Selector.unity
+    guid: 25f6d73f8faa88c478499f8f04feba9e
+  - enabled: 1
     path: Assets/Scenes/Level_Editor.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
     path: Assets/Scenes/Level_Play.unity
     guid: 031e539ebb4f93a4ab4dc578cedace6e
-  - enabled: 1
-    path: Assets/Scenes/Level_Selector.unity
-    guid: 25f6d73f8faa88c478499f8f04feba9e
-  - enabled: 1
-    path: Assets/Scenes/Login_Screen.unity
-    guid: 9e3b431291f39d64bae5358aaa470a1a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

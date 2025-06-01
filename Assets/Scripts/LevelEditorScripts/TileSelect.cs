@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 public class TileSelect : MonoBehaviour
