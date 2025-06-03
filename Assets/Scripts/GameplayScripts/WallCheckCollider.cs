@@ -11,6 +11,8 @@ public class WallCheckCollider : MonoBehaviour
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (!ec.onGround) return;
+        if (collision.gameObject.CompareTag("Collectible")) return;
+        if (collision.gameObject.CompareTag("Exit")) return;
         if (collision.gameObject.CompareTag("Player")) return;
         Debug.Log("Entering collison with wall");
         Debug.Log(collision.gameObject.name);

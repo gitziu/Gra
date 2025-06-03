@@ -5,15 +5,17 @@ using UnityEngine.UI;
 
 public class LoginManager : MonoBehaviour
 {
-    public LoginManager Instance;
+    public static LoginManager Instance;
     private TMP_InputField Username, Password;
     private Transform Submit;
+    private Transform levelExitPopUp;
     public bool NewUser = false;
 
     void Awake()
     {
         Debug.Log("start");
-        Instance = this;
+        if (LoginManager.Instance == null) Instance = this;
+        else Destroy(gameObject);
         Debug.Log("instance set");
         Username = transform.Find("UsernameInput").GetComponent<TMP_InputField>();
         Debug.Log("input 1 set");
@@ -38,7 +40,9 @@ public class LoginManager : MonoBehaviour
         {
             Submit.GetChild(0).GetComponent<TMP_Text>().SetText("Login");
         }
-
+        Username.text = "";
+        Password.text = "";
+        CheckInputFields();
     }
 
     public void CheckInputFields()
