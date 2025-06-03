@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class LoginManager : MonoBehaviour
 {
-    public LoginManager Instance;
+    public static LoginManager Instance;
     private TMP_InputField Username, Password;
     private Transform Submit;
     private Transform levelExitPopUp;
@@ -14,7 +14,8 @@ public class LoginManager : MonoBehaviour
     void Awake()
     {
         Debug.Log("start");
-        Instance = this;
+        if (LoginManager.Instance == null) Instance = this;
+        else Destroy(gameObject);
         Debug.Log("instance set");
         Username = transform.Find("UsernameInput").GetComponent<TMP_InputField>();
         Debug.Log("input 1 set");
@@ -24,15 +25,6 @@ public class LoginManager : MonoBehaviour
         Debug.Log("submit button found");
         Submit.GetComponent<Button>().interactable = false;
         Submit.GetComponent<Button>().onClick.AddListener(BeginLoginSubmission);
-        levelExitPopUp = GameObject.Find("Canvas/ExitGamePopUp").transform;
-        levelExitPopUp.gameObject.SetActive(false);
-        GameObject.Find("Canvas/ExitGameButton").transform.GetComponent<Button>().onClick.AddListener(() => levelExitPopUp.gameObject.SetActive(true));
-        levelExitPopUp.Find("ExitGame").GetComponent<Button>().onClick.AddListener(() =>
-        {
-            DatabaseManager.Instance.CloseConnection();
-            Application.Quit();
-        });
-        levelExitPopUp.Find("ContinueGame").GetComponent<Button>().onClick.AddListener(() => levelExitPopUp.gameObject.SetActive(false));
         Debug.Log("Submit not interactible");
     }
 
@@ -48,7 +40,9 @@ public class LoginManager : MonoBehaviour
         {
             Submit.GetChild(0).GetComponent<TMP_Text>().SetText("Login");
         }
-
+        Username.text = "";
+        Password.text = "";
+        CheckInputFields();
     }
 
     public void CheckInputFields()

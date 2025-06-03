@@ -4,8 +4,6 @@ using UnityEngine.UI;
 
 public class SwitchLoginType : MonoBehaviour
 {
-
-    public LoginManager lm;
     private Button btn;
     private bool SwitchToNewUser = true;
 
@@ -23,7 +21,7 @@ public class SwitchLoginType : MonoBehaviour
             transform.GetChild(0).GetComponent<TMP_Text>().SetText("New User");
         }
         else transform.GetChild(0).GetComponent<TMP_Text>().SetText("Returning User");
-        lm.Instance.SwitchType();
+        LoginManager.Instance.SwitchType();
     }
 
 }
