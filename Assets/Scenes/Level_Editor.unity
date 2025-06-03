@@ -2656,7 +2656,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   btn: {fileID: 1352216292}
-  selectabletile: Platform
+  selectabletile: platform
 --- !u!114 &1352216292
 MonoBehaviour:
   m_ObjectHideFlags: 0

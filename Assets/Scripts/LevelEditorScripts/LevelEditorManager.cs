@@ -21,6 +21,8 @@ public class LevelEditorManager : MonoBehaviour
     private Button playerButton;
     private Button exitButton;
 
+    private int platform_num = -1;
+
     public Tilemap tilemap;
 
     void Awake()
@@ -31,7 +33,7 @@ public class LevelEditorManager : MonoBehaviour
         }
         else Destroy(this.gameObject);
         cameraDrag = true;
-        selectedTile = "Platform";
+        selectedTile = "platform0";
         TileRegistry.LoadTilesFromResources();
         levelName.text = DatabaseManager.Instance.CurrentLevel.name;
         levelName.onEndEdit.AddListener(CheckLevelName);
@@ -179,6 +181,12 @@ public class LevelEditorManager : MonoBehaviour
     public void ChangeSelectedTile(string new_tile)
     {
         Debug.Log("selected tile : " + new_tile);
+        if (new_tile == "platform")
+        {
+            platform_num++;
+            platform_num %= 4;
+            new_tile += platform_num.ToString();
+        }
         selectedTile = new_tile;
     }
 
