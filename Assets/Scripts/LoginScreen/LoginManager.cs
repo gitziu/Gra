@@ -8,6 +8,7 @@ public class LoginManager : MonoBehaviour
     public LoginManager Instance;
     private TMP_InputField Username, Password;
     private Transform Submit;
+    private Transform levelExitPopUp;
     public bool NewUser = false;
 
     void Awake()
@@ -23,6 +24,15 @@ public class LoginManager : MonoBehaviour
         Debug.Log("submit button found");
         Submit.GetComponent<Button>().interactable = false;
         Submit.GetComponent<Button>().onClick.AddListener(BeginLoginSubmission);
+        levelExitPopUp = GameObject.Find("Canvas/ExitGamePopUp").transform;
+        levelExitPopUp.gameObject.SetActive(false);
+        GameObject.Find("Canvas/ExitGameButton").transform.GetComponent<Button>().onClick.AddListener(() => levelExitPopUp.gameObject.SetActive(true));
+        levelExitPopUp.Find("ExitGame").GetComponent<Button>().onClick.AddListener(() =>
+        {
+            DatabaseManager.Instance.CloseConnection();
+            Application.Quit();
+        });
+        levelExitPopUp.Find("ContinueGame").GetComponent<Button>().onClick.AddListener(() => levelExitPopUp.gameObject.SetActive(false));
         Debug.Log("Submit not interactible");
     }
 

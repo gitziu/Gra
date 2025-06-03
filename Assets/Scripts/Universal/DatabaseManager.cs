@@ -159,6 +159,13 @@ public class DatabaseManager : MonoBehaviour
         return sqlConfig;
     }
 
+    public void CloseConnection()
+    {
+        if (connection != null && connection.State == System.Data.ConnectionState.Open) connection.Close();
+        if (ssh != null && ssh.IsConnected) ssh.Disconnect();
+        if (ssh != null) ssh.Dispose();
+    }
+
     public void Login(string username, string password)
     {
         string query = "select id, username, created from platf_users where username=@username and hash=SHA2(CONCAT(@password, salt), 0)";
