@@ -116,7 +116,7 @@ public class SearchPanelManager : MonoBehaviour
 
     public void TogglePanel()
     {
-        transform.DOMoveY(transform.GetComponent<RectTransform>().anchoredPosition.y == 0f ? transform.position.y - 400f : transform.position.y + 400f, smoothTime);
+        transform.GetComponent<RectTransform>().DOAnchorPosY(transform.GetComponent<RectTransform>().anchoredPosition.y == 0f ? -transform.GetComponent<RectTransform>().rect.height : 0f, smoothTime);
     }
 
     public void displayError(Exception e)
