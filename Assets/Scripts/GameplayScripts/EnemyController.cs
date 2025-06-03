@@ -15,10 +15,6 @@ public class EnemyController : MonoBehaviour
         c2d = transform.GetComponent<BoxCollider2D>();
         
     }
-    void Start()
-    {
-
-    }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
