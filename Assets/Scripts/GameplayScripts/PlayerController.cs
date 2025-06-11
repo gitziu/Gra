@@ -244,6 +244,7 @@ public class PlayerController : MonoBehaviour
         {
             LevelGameplayManager.Instance.collectedCollectibles++;
         }
+        if (collision.gameObject.CompareTag("Enemy")) Death();
     }
 
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class EnemyController : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class EnemyController : MonoBehaviour
         {
             Debug.Log("on ground");
             move = 4f;
+            if (transform.Find("WallCheckCollider").GetComponent<BoxCollider2D>().IsTouching(GameObject.Find("Grid/Ground").GetComponent<TilemapCollider2D>()) || !transform.Find("GroundCheckCollider").GetComponent<BoxCollider2D>().IsTouching(GameObject.Find("Grid/Ground").GetComponent<TilemapCollider2D>())) flip(transform);
             onGround = true;
         }
         if (collision.gameObject.CompareTag("Enemy"))
