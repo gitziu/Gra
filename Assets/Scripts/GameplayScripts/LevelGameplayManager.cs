@@ -107,7 +107,7 @@ public class LevelGameplayManager : MonoBehaviour
             {
                 string s = levelContent[y * 1000 + x];
                 if (string.IsNullOrEmpty(s)) continue;
-                Debug.Log("tile : " + s);
+                //Debug.Log("tile : " + s);
                 Vector3 cellBottomLeftWorldPos = Platforms.CellToWorld(new Vector3Int(x, y, 0));
                 Vector3 spawnPosition = cellBottomLeftWorldPos + centerOffset;
                 if (s == "Player") PlayerSpawnPoint = spawnPosition;
@@ -118,8 +118,8 @@ public class LevelGameplayManager : MonoBehaviour
                 else if (s == "Player") Instantiate(PlayerPrefab, spawnPosition, Quaternion.identity);
                 else
                 {
-                    if (s == "Platform") Platforms.SetTile(new Vector3Int(x, y, 0), TileRegistry.GetTile(s));
-                    else Obstacles.SetTile(new Vector3Int(x, y, 0), TileRegistry.GetTile(s));
+                    if (s == "Spikes") Obstacles.SetTile(new Vector3Int(x, y, 0), TileRegistry.GetTile(s));
+                    else  Platforms.SetTile(new Vector3Int(x, y, 0), TileRegistry.GetTile(s));
                 }
             }
         }

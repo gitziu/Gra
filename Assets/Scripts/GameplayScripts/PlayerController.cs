@@ -227,7 +227,7 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if ((collision.collider.CompareTag("Enemy") || collision.collider.CompareTag("Border")) && CurrentlyDying == false)
+        if ((collision.collider.CompareTag("Enemy") || collision.collider.CompareTag("Border") || collision.collider.CompareTag("Obstacles")) && CurrentlyDying == false)
         {
             Death();
         }

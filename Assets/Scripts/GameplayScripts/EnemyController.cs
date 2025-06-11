@@ -18,6 +18,7 @@ public class EnemyController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log("enemy collision " + collision.gameObject.tag);
         if (collision.gameObject.CompareTag("Obstacles")) death();
         if (collision.gameObject.CompareTag("Ground"))
         {
@@ -28,7 +29,6 @@ public class EnemyController : MonoBehaviour
         if (collision.gameObject.CompareTag("Enemy"))
         {
             flip(transform);
-            flip(transform.Find("visual"));
         }
     }
 

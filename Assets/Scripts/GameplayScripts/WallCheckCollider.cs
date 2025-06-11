@@ -8,6 +8,7 @@ public class WallCheckCollider : MonoBehaviour
     {
         ec = transform.parent.GetComponent<EnemyController>();
     }
+    
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (!ec.onGround) return;
